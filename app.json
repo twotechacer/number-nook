@@ -43,6 +43,12 @@
         "projectId": "345db5a1-a655-4ad1-88d4-f1b03731a8ff"
       }
     },
-    "owner": "twotechacer"
+    "owner": "twotechacer",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/345db5a1-a655-4ad1-88d4-f1b03731a8ff"
+    }
   }
 }
