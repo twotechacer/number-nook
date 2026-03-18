@@ -33,25 +33,35 @@ describe('Feeding game logic', () => {
   });
 
   describe('feeding round flow simulation', () => {
-    it('feed N treats → count matches target', () => {
+    it('feed N treats by index → count matches target', () => {
       const target = 7;
-      let fedCount = 0;
+      const fedIndices: number[] = [];
       for (let i = 0; i < target; i++) {
-        fedCount++;
+        fedIndices.push(i);
       }
-      expect(fedCount).toBe(target);
+      expect(fedIndices.length).toBe(target);
     });
 
-    it('undo reduces count by 1', () => {
-      let fedCount = 3;
-      fedCount = Math.max(0, fedCount - 1);
-      expect(fedCount).toBe(2);
+    it('feeding same index twice does not double count', () => {
+      const fedIndices = [0, 1, 2];
+      const index = 1; // already fed
+      if (!fedIndices.includes(index)) {
+        fedIndices.push(index);
+      }
+      expect(fedIndices.length).toBe(3);
     });
 
-    it('undo does not go below 0', () => {
-      let fedCount = 0;
-      fedCount = Math.max(0, fedCount - 1);
-      expect(fedCount).toBe(0);
+    it('undo removes last fed index', () => {
+      const fedIndices = [2, 0, 4];
+      const afterUndo = fedIndices.slice(0, -1);
+      expect(afterUndo).toEqual([2, 0]);
+      expect(afterUndo.length).toBe(2);
+    });
+
+    it('undo on empty does nothing', () => {
+      const fedIndices: number[] = [];
+      const afterUndo = fedIndices.length > 0 ? fedIndices.slice(0, -1) : fedIndices;
+      expect(afterUndo.length).toBe(0);
     });
 
     it('answer choices contain the target', () => {

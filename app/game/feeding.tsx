@@ -16,7 +16,7 @@ export default function FeedingGame() {
   const floorId = (params.floorId || 'floor1') as FloorId;
 
   const {
-    phase, targetNumber, fedCount, answerChoices, attempts,
+    phase, targetNumber, fedCount, fedIndices, answerChoices, attempts,
     startRound, feedTreat, undoTreat, selectAnswer, retryAnswer,
     startTummyFull, completeRound,
   } = useFeedingGame(floorId);
@@ -68,12 +68,8 @@ export default function FeedingGame() {
     return 'waiting';
   }, [phase, fedCount]);
 
-  // Track which treats are fed
-  const fedSet = useMemo(() => {
-    const set = new Set<number>();
-    for (let i = 0; i < fedCount; i++) set.add(i);
-    return set;
-  }, [fedCount]);
+  // Track which treats are fed (by actual tapped index)
+  const fedSet = useMemo(() => new Set(fedIndices), [fedIndices]);
 
   const handleTummyFullComplete = () => {
     router.push({
@@ -126,7 +122,7 @@ export default function FeedingGame() {
                 index={i}
                 emoji={animal?.treatEmoji || '🍎'}
                 isFed={fedSet.has(i)}
-                onTap={feedTreat}
+                onTap={() => feedTreat(i)}
               />
             ))}
           </View>

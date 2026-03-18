@@ -17,7 +17,7 @@ export type FeedingPhase =
 interface FeedingGameState {
   phase: FeedingPhase;
   targetNumber: number;
-  fedCount: number;
+  fedIndices: number[]; // tracks WHICH treats were fed, in order
   answerChoices: [number, number, number];
   attempts: number;
 }
@@ -35,7 +35,7 @@ export function useFeedingGame(floorId: FloorId) {
   const [state, setState] = useState<FeedingGameState>({
     phase: 'idle',
     targetNumber: 0,
-    fedCount: 0,
+    fedIndices: [],
     answerChoices: [0, 0, 0],
     attempts: 0,
   });
@@ -49,27 +49,28 @@ export function useFeedingGame(floorId: FloorId) {
     setState({
       phase: 'feeding',
       targetNumber: num,
-      fedCount: 0,
+      fedIndices: [],
       answerChoices: choices,
       attempts: 0,
     });
   }, [mastery, floorRange]);
 
-  const feedTreat = useCallback(() => {
+  const feedTreat = useCallback((index: number) => {
     setState((prev) => {
       if (prev.phase !== 'feeding') return prev;
-      const newCount = prev.fedCount + 1;
-      if (newCount >= prev.targetNumber) {
-        return { ...prev, fedCount: newCount, phase: 'answering' };
+      if (prev.fedIndices.includes(index)) return prev; // already fed
+      const newFedIndices = [...prev.fedIndices, index];
+      if (newFedIndices.length >= prev.targetNumber) {
+        return { ...prev, fedIndices: newFedIndices, phase: 'answering' };
       }
-      return { ...prev, fedCount: newCount };
+      return { ...prev, fedIndices: newFedIndices };
     });
   }, []);
 
   const undoTreat = useCallback(() => {
     setState((prev) => {
-      if (prev.phase !== 'feeding' || prev.fedCount <= 0) return prev;
-      return { ...prev, fedCount: prev.fedCount - 1 };
+      if (prev.phase !== 'feeding' || prev.fedIndices.length <= 0) return prev;
+      return { ...prev, fedIndices: prev.fedIndices.slice(0, -1) };
     });
   }, []);
 
@@ -111,6 +112,7 @@ export function useFeedingGame(floorId: FloorId) {
 
   return {
     ...state,
+    fedCount: state.fedIndices.length,
     startRound,
     feedTreat,
     undoTreat,

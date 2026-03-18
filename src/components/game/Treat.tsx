@@ -11,6 +11,7 @@ interface TreatProps {
 export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const flyAnim = useRef(new Animated.Value(0)).current;
+  const wasFed = useRef(false);
 
   // Entrance animation
   useEffect(() => {
@@ -23,9 +24,10 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
     }).start();
   }, []);
 
-  // Fly-to-animal animation when fed
+  // Fly-to-animal animation when fed, restore when unfed (undo)
   useEffect(() => {
-    if (isFed) {
+    if (isFed && !wasFed.current) {
+      wasFed.current = true;
       Animated.parallel([
         Animated.timing(flyAnim, {
           toValue: -200,
@@ -38,6 +40,16 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
           useNativeDriver: true,
         }),
       ]).start();
+    } else if (!isFed && wasFed.current) {
+      // Undo — restore the treat
+      wasFed.current = false;
+      flyAnim.setValue(0);
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
     }
   }, [isFed]);
 
@@ -55,7 +67,6 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
               { scale: scaleAnim },
               { translateY: flyAnim },
             ],
-            opacity: isFed ? scaleAnim : 1,
           },
         ]}
       >
