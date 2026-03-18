@@ -14,12 +14,20 @@ import { createInitialProfile } from './initialState';
 import { computeMechanicUnlocks, computeFloorUnlocks } from '@/engine/unlocks';
 import { MAX_SESSION_LOG } from '@/data/thresholds';
 
+export interface UnlockEvent {
+  type: 'mechanic' | 'floor';
+  mechanic?: 'feed' | 'bubbles';
+  floorId?: 'floor2' | 'floor3';
+  groupKey?: string;
+}
+
 interface TransientState {
   isHydrated: boolean;
   currentSessionStart: number | null;
   currentSessionNumbers: number[];
   currentSessionMechanics: MechanicType[];
   currentSessionStars: number;
+  pendingUnlockEvents: UnlockEvent[];
 }
 
 interface GameActions {
@@ -34,6 +42,7 @@ interface GameActions {
   endSession: () => void;
   resetProgress: () => void;
   setHydrated: () => void;
+  clearUnlockEvents: () => void;
 }
 
 export type GameStore = ChildProfile & TransientState & GameActions;
@@ -44,6 +53,7 @@ const initialTransient: TransientState = {
   currentSessionNumbers: [],
   currentSessionMechanics: [],
   currentSessionStars: 0,
+  pendingUnlockEvents: [],
 };
 
 export const useGameStore = create<GameStore>()(
@@ -90,6 +100,24 @@ export const useGameStore = create<GameStore>()(
             };
           }
 
+          // Detect new unlock events
+          const unlockEvents: UnlockEvent[] = [];
+          for (const [gk, unlocks] of Object.entries(mergedMechanicUnlocks)) {
+            const prev = state.mechanicUnlocks[gk as keyof MechanicUnlockMap];
+            if (!prev.feed && unlocks.feed) {
+              unlockEvents.push({ type: 'mechanic', mechanic: 'feed', groupKey: gk });
+            }
+            if (!prev.bubbles && unlocks.bubbles) {
+              unlockEvents.push({ type: 'mechanic', mechanic: 'bubbles', groupKey: gk });
+            }
+          }
+          if (!state.floorUnlocks.floor2 && newFloorUnlocks.floor2) {
+            unlockEvents.push({ type: 'floor', floorId: 'floor2' });
+          }
+          if (!state.floorUnlocks.floor3 && newFloorUnlocks.floor3) {
+            unlockEvents.push({ type: 'floor', floorId: 'floor3' });
+          }
+
           // Track in current session
           const sessionNumbers = state.currentSessionNumbers.includes(num)
             ? state.currentSessionNumbers
@@ -104,6 +132,9 @@ export const useGameStore = create<GameStore>()(
             floorUnlocks: newFloorUnlocks,
             currentSessionNumbers: sessionNumbers,
             currentSessionMechanics: sessionMechanics,
+            pendingUnlockEvents: unlockEvents.length > 0
+              ? [...state.pendingUnlockEvents, ...unlockEvents]
+              : state.pendingUnlockEvents,
           };
         }),
 
@@ -155,6 +186,7 @@ export const useGameStore = create<GameStore>()(
 
       resetProgress: () => set({ ...createInitialProfile(), ...initialTransient, isHydrated: true }),
       setHydrated: () => set({ isHydrated: true }),
+      clearUnlockEvents: () => set({ pendingUnlockEvents: [] }),
     }),
     {
       name: 'number-nook-profile',
@@ -162,10 +194,10 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => {
         const {
           isHydrated, currentSessionStart, currentSessionNumbers,
-          currentSessionMechanics, currentSessionStars,
+          currentSessionMechanics, currentSessionStars, pendingUnlockEvents,
           setChildName, setVoicePreference, updateSettings, recordAnswer,
           addStar, overrideFloorUnlock, overrideMechanicUnlock,
-          startSession, endSession, resetProgress, setHydrated,
+          startSession, endSession, resetProgress, setHydrated, clearUnlockEvents,
           ...persisted
         } = state;
         return persisted;

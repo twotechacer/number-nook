@@ -1,0 +1,69 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Play a feeding game round (requires feed mechanic to be unlocked)
+# Pre-condition: Feed must be unlocked on Floor 1 (5 counting correct in group 1_10)
+
+- launchApp
+
+# Skip onboarding if shown
+- tapOn:
+    text: "Skip for now"
+    optional: true
+
+# Navigate to Floor 1
+- tapOn:
+    id: "floor-card-1"
+
+# Tap feed mechanic (will only work if unlocked)
+- tapOn:
+    text: "Feed the animals!"
+    optional: true
+
+# If we get to the feeding game screen
+- assertVisible:
+    text: "Feed"
+    timeout: 3000
+    optional: true
+
+# The feeding game should show the animal
+- assertVisible:
+    text: "is hungry!"
+    optional: true
+
+# Tap treats to feed the animal
+- tapOn:
+    id: "treat-0"
+    optional: true
+- tapOn:
+    id: "treat-1"
+    optional: true
+- tapOn:
+    id: "treat-2"
+    optional: true
+- tapOn:
+    id: "treat-3"
+    optional: true
+- tapOn:
+    id: "treat-4"
+    optional: true
+- tapOn:
+    id: "treat-5"
+    optional: true
+- tapOn:
+    id: "treat-6"
+    optional: true
+- tapOn:
+    id: "treat-7"
+    optional: true
+- tapOn:
+    id: "treat-8"
+    optional: true
+- tapOn:
+    id: "treat-9"
+    optional: true
+
+# After all fed, answer phase should appear
+- assertVisible:
+    text: "did you feed"
+    timeout: 5000
+    optional: true

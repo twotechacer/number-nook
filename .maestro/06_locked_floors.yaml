@@ -1,0 +1,33 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Verify locked floors cannot be entered
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Home screen — Floor 1 is unlocked, Floor 2 and 3 are locked
+- assertVisible: "Floor 1"
+- assertVisible: "Floor 2"
+- assertVisible: "Floor 3"
+
+# Verify lock icons are present (Floors 2 and 3)
+- assertVisible: "🔒"
+
+# Verify Floor 1 shows phase label
+- assertVisible: "Counting unlocked"
+
+# Verify unlock messages for locked floors
+- assertVisible: "Complete Floor 1 to unlock"
+
+# Try tapping Floor 2 — should NOT navigate (stays on home)
+- tapOn:
+    id: "floor-card-2"
+- assertVisible: "Number Nook"
+# Still on home screen — navigation didn't happen
+
+# Floor 1 should still work
+- tapOn:
+    id: "floor-card-1"
+- assertVisible: "Count it!"

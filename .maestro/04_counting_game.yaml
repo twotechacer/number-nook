@@ -1,0 +1,60 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Play a counting game round on Floor 1
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Navigate to Floor 1
+- tapOn:
+    id: "floor-card-1"
+
+# Tap "Count it!" mechanic
+- tapOn: "Count it!"
+
+# Counting game screen should appear
+- assertVisible: "Counting"
+- assertVisible: "tapped so far"
+
+# Tap objects (tap first few objects in the field)
+- tapOn:
+    id: "object-0"
+- tapOn:
+    id: "object-1"
+
+# Counter should update (at least 2 tapped)
+- assertVisible: "2"
+
+# Keep tapping remaining objects until answer phase appears
+# (the target number is random 1-10, so we tap all available)
+- tapOn:
+    id: "object-2"
+    optional: true
+- tapOn:
+    id: "object-3"
+    optional: true
+- tapOn:
+    id: "object-4"
+    optional: true
+- tapOn:
+    id: "object-5"
+    optional: true
+- tapOn:
+    id: "object-6"
+    optional: true
+- tapOn:
+    id: "object-7"
+    optional: true
+- tapOn:
+    id: "object-8"
+    optional: true
+- tapOn:
+    id: "object-9"
+    optional: true
+
+# Answer phase should eventually appear
+- assertVisible:
+    text: "How many did you count?"
+    timeout: 5000
