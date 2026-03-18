@@ -19,7 +19,7 @@ interface BubbleFieldProps {
 
 const MIN_SIZE = 52;
 const MAX_SIZE = 72;
-const DRIFT_SPEED = 2.0; // pixels per frame (~60px/sec at 30fps)
+const DRIFT_SPEED = 0.8; // pixels per frame (~24px/sec at 30fps, gentle drift)
 const TICK_MS = 33; // ~30fps
 
 function generateInitialPositions(count: number, width: number, height: number): BubblePosition[] {

@@ -5,7 +5,7 @@ interface CountableObjectProps {
   index: number;
   isTapped: boolean;
   emoji: string;
-  onTap: () => void;
+  onTap: (index: number) => void;
 }
 
 // Predefined organic positions (not a grid) for up to 10 objects
@@ -29,7 +29,7 @@ export function CountableObject({ index, isTapped, emoji, onTap }: CountableObje
         { top: `${pos.top}%`, left: `${pos.left}%` },
         isTapped && styles.tapped,
       ]}
-      onPress={onTap}
+      onPress={() => onTap(index)}
       disabled={isTapped}
     >
       <Text style={styles.emoji}>{emoji}</Text>

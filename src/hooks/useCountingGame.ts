@@ -11,7 +11,7 @@ export type CountingPhase = 'idle' | 'tapping' | 'answering' | 'correct' | 'wron
 interface CountingGameState {
   phase: CountingPhase;
   targetNumber: number;
-  tappedCount: number;
+  tappedIndices: Set<number>;
   answerChoices: [number, number, number];
   attempts: number;
 }
@@ -29,7 +29,7 @@ export function useCountingGame(floorId: FloorId) {
   const [state, setState] = useState<CountingGameState>({
     phase: 'idle',
     targetNumber: 0,
-    tappedCount: 0,
+    tappedIndices: new Set<number>(),
     answerChoices: [0, 0, 0],
     attempts: 0,
   });
@@ -43,21 +43,23 @@ export function useCountingGame(floorId: FloorId) {
     setState({
       phase: 'tapping',
       targetNumber: num,
-      tappedCount: 0,
+      tappedIndices: new Set<number>(),
       answerChoices: choices,
       attempts: 0,
     });
   }, [mastery, floorRange]);
 
-  const tapObject = useCallback(() => {
+  const tapObject = useCallback((index: number) => {
     hapticTap();
     setState((prev) => {
       if (prev.phase !== 'tapping') return prev;
-      const newCount = prev.tappedCount + 1;
-      if (newCount >= prev.targetNumber) {
-        return { ...prev, tappedCount: newCount, phase: 'answering' };
+      if (prev.tappedIndices.has(index)) return prev;
+      const newIndices = new Set(prev.tappedIndices);
+      newIndices.add(index);
+      if (newIndices.size >= prev.targetNumber) {
+        return { ...prev, tappedIndices: newIndices, phase: 'answering' };
       }
-      return { ...prev, tappedCount: newCount };
+      return { ...prev, tappedIndices: newIndices };
     });
   }, []);
 
@@ -94,6 +96,7 @@ export function useCountingGame(floorId: FloorId) {
 
   return {
     ...state,
+    tappedCount: state.tappedIndices.size,
     startRound,
     tapObject,
     selectAnswer,

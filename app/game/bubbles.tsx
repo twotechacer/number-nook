@@ -20,10 +20,19 @@ export default function BubblesGame() {
     startRound, popBubble, selectAnswer, retryAnswer, completeRound,
   } = useBubblesGame(floorId);
 
+  const [roundNumber, setRoundNumber] = useState(1);
+
   // Start first round on mount
   useEffect(() => {
     if (phase === 'idle') startRound();
   }, [phase, startRound]);
+
+  // Increment round counter on new round
+  useEffect(() => {
+    if (phase === 'complete') {
+      setRoundNumber((prev) => prev + 1);
+    }
+  }, [phase]);
 
   // Auto-retry after wrong answer
   useEffect(() => {
@@ -90,7 +99,10 @@ export default function BubblesGame() {
           <Text style={styles.headerTitle}>Pop the Bubbles</Text>
           <Text style={styles.headerSubtitle}>{getProgressMessage()}</Text>
         </View>
-        <Text style={styles.headerEmoji}>{animal?.emoji}</Text>
+        <View style={styles.headerRight}>
+          <Text style={styles.headerEmoji}>{animal?.emoji}</Text>
+          <Text style={styles.roundBadge}>Round {roundNumber}</Text>
+        </View>
       </View>
 
       {/* Counter */}
@@ -181,8 +193,17 @@ const styles = StyleSheet.create({
     color: '#A4D2E1',
     fontWeight: '500',
   },
+  headerRight: {
+    alignItems: 'center',
+  },
   headerEmoji: {
     fontSize: 32,
+  },
+  roundBadge: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
   counterContainer: {
     alignItems: 'center',

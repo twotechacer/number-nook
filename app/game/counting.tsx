@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCountingGame } from '@/hooks/useCountingGame';
 import { CountableObject } from '@/components/game/CountableObject';
-import { TeensFrame } from '@/components/game/TeensFrame';
 import { NumeralChoice } from '@/components/game/NumeralChoice';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
@@ -24,7 +23,7 @@ export default function CountingGame() {
   const floorId = (params.floorId || 'floor1') as FloorId;
 
   const {
-    phase, targetNumber, tappedCount, answerChoices, attempts,
+    phase, targetNumber, tappedCount, tappedIndices, answerChoices, attempts,
     startRound, tapObject, selectAnswer, retryAnswer, completeRound,
   } = useCountingGame(floorId);
 
@@ -36,7 +35,6 @@ export default function CountingGame() {
   // Auto-retry after wrong answer shake
   useEffect(() => {
     if (phase === 'wrong') {
-      setWrongPhrase(getRandomWrongPhrase());
       const timer = setTimeout(retryAnswer, 800);
       return () => clearTimeout(timer);
     }
@@ -65,7 +63,6 @@ export default function CountingGame() {
   }, [phase, startRound]);
 
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
-  const [wrongPhrase, setWrongPhrase] = useState('');
 
   // Sparkle on correct answer
   useEffect(() => {
@@ -78,12 +75,7 @@ export default function CountingGame() {
   const emojis = OBJECT_EMOJIS[floorId] || OBJECT_EMOJIS.floor1;
   const objectEmoji = emojis[targetNumber % emojis.length];
 
-  // Track which objects are tapped
-  const tappedSet = useMemo(() => {
-    const set = new Set<number>();
-    for (let i = 0; i < tappedCount; i++) set.add(i);
-    return set;
-  }, [tappedCount]);
+  // tappedIndices from hook tracks exactly which items were tapped
 
   if (phase === 'idle') return null;
 
@@ -101,27 +93,18 @@ export default function CountingGame() {
         <Text style={styles.headerEmoji}>{animal?.emoji}</Text>
       </View>
 
-      {/* Object field — use TeensFrame for 11-19, regular layout otherwise */}
-      {targetNumber >= 11 && targetNumber <= 19 ? (
-        <TeensFrame
-          targetNumber={targetNumber}
-          tappedSet={tappedSet}
-          emoji={objectEmoji}
-          onTap={tapObject}
-        />
-      ) : (
-        <View testID="object-field" style={styles.objectField}>
-          {Array.from({ length: targetNumber }, (_, i) => (
-            <CountableObject
-              key={i}
-              index={i}
-              isTapped={tappedSet.has(i)}
-              emoji={objectEmoji}
-              onTap={tapObject}
-            />
-          ))}
-        </View>
-      )}
+      {/* Object field */}
+      <View testID="object-field" style={styles.objectField}>
+        {Array.from({ length: targetNumber }, (_, i) => (
+          <CountableObject
+            key={i}
+            index={i}
+            isTapped={tappedIndices.has(i)}
+            emoji={objectEmoji}
+            onTap={tapObject}
+          />
+        ))}
+      </View>
 
       {/* Counter */}
       <View testID="counter-container" style={styles.counterContainer}>
@@ -151,7 +134,7 @@ export default function CountingGame() {
             ))}
           </View>
           {phase === 'wrong' && (
-            <Text style={styles.tryAgain}>{wrongPhrase}</Text>
+            <Text style={styles.tryAgain}>Hmm, let's try again!</Text>
           )}
         </View>
       )}

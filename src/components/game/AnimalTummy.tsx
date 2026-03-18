@@ -20,6 +20,14 @@ const EXPRESSION_TEXT: Record<AnimalExpression, string> = {
   full: 'tummy is full!',
 };
 
+// Mouth states shown below the animal emoji
+const MOUTH_EMOJI: Record<AnimalExpression, string> = {
+  waiting: '😋', // licking lips, hungry
+  eating: '😮',  // mouth open, receiving food
+  happy: '😊',   // happy smile
+  full: '🤤',    // satisfied, full
+};
+
 export function AnimalTummy({
   emoji,
   name,
@@ -32,6 +40,7 @@ export function AnimalTummy({
   const bellyScale = useRef(new Animated.Value(1)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const starScale = useRef(new Animated.Value(0)).current;
+  const mouthScale = useRef(new Animated.Value(1)).current;
 
   // Belly pulse on each feed
   useEffect(() => {
@@ -42,6 +51,16 @@ export function AnimalTummy({
       ]).start();
     }
   }, [fedCount]);
+
+  // Mouth open/close animation when eating
+  useEffect(() => {
+    if (expression === 'eating') {
+      Animated.sequence([
+        Animated.timing(mouthScale, { toValue: 1.3, duration: 200, useNativeDriver: true }),
+        Animated.timing(mouthScale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [fedCount, expression]);
 
   // Tummy-full celebration sequence
   useEffect(() => {
@@ -71,7 +90,7 @@ export function AnimalTummy({
 
   return (
     <View testID="animal-tummy" style={styles.container}>
-      {/* Animal */}
+      {/* Animal with expression face */}
       <Animated.View
         style={[
           styles.animalContainer,
@@ -84,6 +103,10 @@ export function AnimalTummy({
         ]}
       >
         <Text style={styles.animalEmoji}>{emoji}</Text>
+        {/* Expression face overlay */}
+        <Animated.View style={[styles.mouthContainer, { transform: [{ scale: mouthScale }] }]}>
+          <Text style={styles.mouthEmoji}>{MOUTH_EMOJI[expression]}</Text>
+        </Animated.View>
       </Animated.View>
 
       {/* Expression text */}
@@ -116,9 +139,16 @@ const styles = StyleSheet.create({
   },
   animalContainer: {
     marginBottom: 8,
+    alignItems: 'center',
   },
   animalEmoji: {
     fontSize: 80,
+  },
+  mouthContainer: {
+    marginTop: -8,
+  },
+  mouthEmoji: {
+    fontSize: 32,
   },
   expressionText: {
     fontSize: 18,
