@@ -10,10 +10,10 @@ interface CountableObjectProps {
 
 // Predefined organic positions (not a grid) for up to 10 objects
 const POSITIONS: { top: number; left: number }[] = [
-  { top: 10, left: 25 }, { top: 5, left: 60 }, { top: 35, left: 10 },
-  { top: 30, left: 48 }, { top: 30, left: 80 }, { top: 55, left: 20 },
-  { top: 58, left: 55 }, { top: 55, left: 85 }, { top: 78, left: 35 },
-  { top: 80, left: 70 },
+  { top: 8, left: 20 }, { top: 5, left: 58 }, { top: 30, left: 5 },
+  { top: 28, left: 42 }, { top: 26, left: 75 }, { top: 52, left: 15 },
+  { top: 54, left: 50 }, { top: 50, left: 80 }, { top: 75, left: 30 },
+  { top: 76, left: 65 },
 ];
 
 export function CountableObject({ index, isTapped, emoji, onTap }: CountableObjectProps) {
@@ -42,9 +42,9 @@ export function CountableObject({ index, isTapped, emoji, onTap }: CountableObje
 const styles = StyleSheet.create({
   object: {
     position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
@@ -61,21 +61,21 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   emoji: {
-    fontSize: 28,
+    fontSize: 36,
   },
   checkmark: {
     position: 'absolute',
-    top: -6,
-    right: -6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    top: -4,
+    right: -4,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkText: {
-    fontSize: 13,
+    fontSize: 15,
     color: COLORS.white,
     fontWeight: 'bold',
   },
