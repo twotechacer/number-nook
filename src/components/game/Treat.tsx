@@ -56,6 +56,8 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
   return (
     <Pressable
       testID={`treat-${index}`}
+      accessibilityLabel={isFed ? `Treat ${index + 1}, fed` : `Feed treat ${index + 1}`}
+      accessibilityRole="button"
       onPress={isFed ? undefined : onTap}
       disabled={isFed}
     >

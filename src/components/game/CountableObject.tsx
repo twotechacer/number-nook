@@ -22,6 +22,8 @@ export function CountableObject({ index, isTapped, emoji, onTap }: CountableObje
   return (
     <Pressable
       testID={`object-${index}`}
+      accessibilityLabel={isTapped ? `Object ${index + 1}, tapped` : `Tap object ${index + 1}`}
+      accessibilityRole="button"
       style={[
         styles.object,
         { top: `${pos.top}%`, left: `${pos.left}%` },
