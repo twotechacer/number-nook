@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -7,6 +7,7 @@ import { CountableObject } from '@/components/game/CountableObject';
 import { NumeralChoice } from '@/components/game/NumeralChoice';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
+import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
 
@@ -22,7 +23,7 @@ export default function CountingGame() {
   const floorId = (params.floorId || 'floor1') as FloorId;
 
   const {
-    phase, targetNumber, tappedCount, answerChoices, attempts,
+    phase, targetNumber, tappedCount, tappedIndices, answerChoices, attempts,
     startRound, tapObject, selectAnswer, retryAnswer, completeRound,
   } = useCountingGame(floorId);
 
@@ -74,12 +75,7 @@ export default function CountingGame() {
   const emojis = OBJECT_EMOJIS[floorId] || OBJECT_EMOJIS.floor1;
   const objectEmoji = emojis[targetNumber % emojis.length];
 
-  // Track which objects are tapped
-  const tappedSet = useMemo(() => {
-    const set = new Set<number>();
-    for (let i = 0; i < tappedCount; i++) set.add(i);
-    return set;
-  }, [tappedCount]);
+  // tappedIndices from hook tracks exactly which items were tapped
 
   if (phase === 'idle') return null;
 
@@ -103,7 +99,7 @@ export default function CountingGame() {
           <CountableObject
             key={i}
             index={i}
-            isTapped={tappedSet.has(i)}
+            isTapped={tappedIndices.has(i)}
             emoji={objectEmoji}
             onTap={tapObject}
           />
