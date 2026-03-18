@@ -31,6 +31,7 @@ export function FloorCard({
 }: FloorCardProps) {
   return (
     <Pressable
+      testID={`floor-card-${floorNumber}`}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: isLocked ? 'rgba(0,0,0,0.03)' : color + '30' },

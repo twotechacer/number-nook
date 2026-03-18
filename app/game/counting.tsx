@@ -98,7 +98,7 @@ export default function CountingGame() {
       </View>
 
       {/* Object field */}
-      <View style={styles.objectField}>
+      <View testID="object-field" style={styles.objectField}>
         {Array.from({ length: targetNumber }, (_, i) => (
           <CountableObject
             key={i}
@@ -111,8 +111,8 @@ export default function CountingGame() {
       </View>
 
       {/* Counter */}
-      <View style={styles.counterContainer}>
-        <Text style={styles.counter}>{tappedCount}</Text>
+      <View testID="counter-container" style={styles.counterContainer}>
+        <Text testID="tap-counter" style={styles.counter}>{tappedCount}</Text>
         <Text style={styles.counterLabel}>tapped so far</Text>
       </View>
 

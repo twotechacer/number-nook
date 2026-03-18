@@ -1,12 +1,14 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useGameStore } from '@/store/useGameStore';
+import { useGameStore, UnlockEvent } from '@/store/useGameStore';
 import { FLOORS, getFloorById } from '@/data/floors';
 import { ANIMALS } from '@/data/animals';
 import { COLORS } from '@/data/colors';
 import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD } from '@/data/thresholds';
 import { LockOverlay } from '@/components/ui/LockOverlay';
+import { UnlockBanner } from '@/components/ui/UnlockBanner';
 import { NumberGroupKey } from '@/types/game';
 
 interface MechanicCardProps {
@@ -70,21 +72,43 @@ export default function FloorMenu() {
   const { floorId } = useLocalSearchParams<{ floorId: string }>();
   const mechanicUnlocks = useGameStore((s) => s.mechanicUnlocks);
   const numberMastery = useGameStore((s) => s.numberMastery);
+  const pendingUnlockEvents = useGameStore((s) => s.pendingUnlockEvents);
+  const clearUnlockEvents = useGameStore((s) => s.clearUnlockEvents);
+
+  const [bannerMessage, setBannerMessage] = useState('');
+  const [bannerEmoji, setBannerEmoji] = useState('');
+  const [bannerVisible, setBannerVisible] = useState(false);
+
+  // Show unlock banner when there are pending mechanic unlock events
+  useEffect(() => {
+    const mechanicEvents = pendingUnlockEvents.filter((e) => e.type === 'mechanic');
+    if (mechanicEvents.length > 0) {
+      const event = mechanicEvents[0];
+      if (event.mechanic === 'feed') {
+        setBannerMessage('Feed the animals unlocked!');
+        setBannerEmoji('🎉');
+      } else if (event.mechanic === 'bubbles') {
+        setBannerMessage('Pop the bubbles unlocked!');
+        setBannerEmoji('🫧');
+      }
+      setBannerVisible(true);
+      clearUnlockEvents();
+    }
+  }, [pendingUnlockEvents]);
 
   const floor = getFloorById(floorId || '');
 
   // Derive values safely (no conditional hooks)
-  const firstGroup: NumberGroupKey = floor ? floor.groups[0] : '1_10';
-  const feedUnlocked = mechanicUnlocks[firstGroup]?.feed ?? false;
-  const bubblesUnlocked = mechanicUnlocks[firstGroup]?.bubbles ?? false;
+  // Check ALL groups in this floor — unlock if ANY group qualifies
+  const floorGroups: NumberGroupKey[] = floor ? floor.groups : ['1_10'];
+  const feedUnlocked = floorGroups.some((g) => mechanicUnlocks[g]?.feed ?? false);
+  const bubblesUnlocked = floorGroups.some((g) => mechanicUnlocks[g]?.bubbles ?? false);
 
-  // Compute group progress
+  // Compute progress across ALL groups in this floor
   let countingCorrect = 0;
   let feedCorrect = 0;
   if (floor) {
-    const [fromStr, toStr] = firstGroup.split('_');
-    const from = parseInt(fromStr, 10);
-    const to = parseInt(toStr, 10);
+    const [from, to] = floor.numberRange;
     for (let n = from; n <= to; n++) {
       const stats = numberMastery[String(n)];
       if (stats) {
@@ -111,6 +135,12 @@ export default function FloorMenu() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <UnlockBanner
+        message={bannerMessage}
+        emoji={bannerEmoji}
+        visible={bannerVisible}
+        onDismiss={() => setBannerVisible(false)}
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -137,7 +167,7 @@ export default function FloorMenu() {
         </View>
         {!bubblesUnlocked && (
           <Text style={styles.lockHint}>
-            Bubbles locked · {feedUnlocked ? `${feedCorrect}/3 feeds` : `${countingCorrect}/5 counts`}
+            Bubbles locked · {feedUnlocked ? `${Math.min(feedCorrect, 3)}/3 feeds` : `${Math.min(countingCorrect, 5)}/5 counts`}
           </Text>
         )}
 

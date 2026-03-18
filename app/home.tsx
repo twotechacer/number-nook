@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -7,6 +8,7 @@ import { FLOORS } from '@/data/floors';
 import { ANIMALS } from '@/data/animals';
 import { COLORS } from '@/data/colors';
 import { FloorCard } from '@/components/treehouse/FloorCard';
+import { UnlockBanner } from '@/components/ui/UnlockBanner';
 import { countMastered } from '@/engine/mastery';
 
 function FloorCardConnected({ floorIndex }: { floorIndex: number }) {
@@ -46,9 +48,34 @@ function FloorCardConnected({ floorIndex }: { floorIndex: number }) {
 export default function Home() {
   const childName = useGameStore((s) => s.childName);
   const totalStars = useGameStore((s) => s.totalStars);
+  const pendingUnlockEvents = useGameStore((s) => s.pendingUnlockEvents);
+  const clearUnlockEvents = useGameStore((s) => s.clearUnlockEvents);
+
+  const [bannerMessage, setBannerMessage] = useState('');
+  const [bannerEmoji, setBannerEmoji] = useState('');
+  const [bannerVisible, setBannerVisible] = useState(false);
+
+  // Show floor unlock celebration
+  useEffect(() => {
+    const floorEvents = pendingUnlockEvents.filter((e) => e.type === 'floor');
+    if (floorEvents.length > 0) {
+      const event = floorEvents[0];
+      const floor = FLOORS.find((f) => f.id === event.floorId);
+      setBannerMessage(`${floor?.name || 'New floor'} unlocked!`);
+      setBannerEmoji('🏠');
+      setBannerVisible(true);
+      clearUnlockEvents();
+    }
+  }, [pendingUnlockEvents]);
 
   return (
     <SafeAreaView style={styles.container}>
+      <UnlockBanner
+        message={bannerMessage}
+        emoji={bannerEmoji}
+        visible={bannerVisible}
+        onDismiss={() => setBannerVisible(false)}
+      />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View>

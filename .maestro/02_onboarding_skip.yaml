@@ -1,0 +1,15 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Onboarding — skip name entry
+- launchApp:
+    clearState: true
+
+# Onboarding screen
+- assertVisible: "Number Nook"
+
+# Tap skip
+- tapOn: "Skip for now"
+
+# Should be on home screen with generic greeting
+- assertVisible: "Number Nook"
+- assertVisible: "pick a floor to explore"

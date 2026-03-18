@@ -1,0 +1,33 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Onboarding — enter name and navigate to home
+- launchApp:
+    clearState: true
+
+# Onboarding screen should be visible
+- assertVisible: "Number Nook"
+- assertVisible: "What's your little one's name?"
+
+# Enter child name
+- tapOn:
+    id: "name-input"
+- inputText: "Aria"
+
+# Button should show personalized text
+- assertVisible: "Let's go, Aria!"
+
+# Tap start button
+- tapOn:
+    id: "start-button"
+
+# Should be on home screen
+- assertVisible: "Number Nook"
+- assertVisible: "Hi Aria! Pick a floor"
+
+# All 3 floors visible
+- assertVisible: "Floor 1"
+- assertVisible: "Floor 2"
+- assertVisible: "Floor 3"
+
+# Star counter visible
+- assertVisible: "0 stars collected"

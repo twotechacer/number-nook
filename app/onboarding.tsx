@@ -31,6 +31,7 @@ export default function Onboarding() {
         <Text style={styles.subtitle}>What's your little one's name?</Text>
 
         <TextInput
+          testID="name-input"
           style={styles.input}
           placeholder="Type their name here..."
           placeholderTextColor={COLORS.textSecondary}
@@ -44,6 +45,7 @@ export default function Onboarding() {
         />
 
         <Pressable
+          testID="start-button"
           style={[styles.button, !name.trim() && styles.buttonMuted]}
           onPress={handleStart}
         >
