@@ -38,7 +38,7 @@ function FloorCardConnected({ floorIndex }: { floorIndex: number }) {
       progress={progress}
       progressText={`${mastered} of ${total} numbers mastered`}
       isLocked={!isUnlocked}
-      onPress={() => router.push(`/floor/${floor.id}`)}
+      onPress={() => router.push({ pathname: '/floor/[floorId]', params: { floorId: floor.id } })}
     />
   );
 }

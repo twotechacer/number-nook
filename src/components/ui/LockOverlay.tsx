@@ -17,20 +17,21 @@ export function LockOverlay({ message }: LockOverlayProps) {
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: COLORS.lockOverlay,
+    backgroundColor: 'rgba(247,244,238,0.92)',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   lock: {
-    fontSize: 28,
+    fontSize: 24,
   },
   message: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 4,
+    marginTop: 6,
     textAlign: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
+    lineHeight: 18,
   },
 });

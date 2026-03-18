@@ -2,13 +2,12 @@ import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGameStore } from '@/store/useGameStore';
-import { useIsMechanicUnlocked, useGroupProgress } from '@/store/selectors';
 import { FLOORS, getFloorById } from '@/data/floors';
 import { ANIMALS } from '@/data/animals';
 import { COLORS } from '@/data/colors';
 import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD } from '@/data/thresholds';
 import { LockOverlay } from '@/components/ui/LockOverlay';
-import { FloorId, NumberGroupKey } from '@/types/game';
+import { NumberGroupKey } from '@/types/game';
 
 interface MechanicCardProps {
   title: string;
@@ -33,8 +32,7 @@ function MechanicCard({
         styles.mechanicCard,
         pressed && !isLocked && styles.mechanicPressed,
       ]}
-      onPress={onPress}
-      disabled={isLocked}
+      onPress={isLocked ? undefined : onPress}
     >
       {isLocked && <LockOverlay message={lockMessage} />}
 
@@ -70,21 +68,46 @@ function MechanicCard({
 
 export default function FloorMenu() {
   const { floorId } = useLocalSearchParams<{ floorId: string }>();
+  const mechanicUnlocks = useGameStore((s) => s.mechanicUnlocks);
+  const numberMastery = useGameStore((s) => s.numberMastery);
+
   const floor = getFloorById(floorId || '');
 
-  if (!floor) return null;
+  // Derive values safely (no conditional hooks)
+  const firstGroup: NumberGroupKey = floor ? floor.groups[0] : '1_10';
+  const feedUnlocked = mechanicUnlocks[firstGroup]?.feed ?? false;
+  const bubblesUnlocked = mechanicUnlocks[firstGroup]?.bubbles ?? false;
 
-  const firstGroup = floor.groups[0];
+  // Compute group progress
+  let countingCorrect = 0;
+  let feedCorrect = 0;
+  if (floor) {
+    const [fromStr, toStr] = firstGroup.split('_');
+    const from = parseInt(fromStr, 10);
+    const to = parseInt(toStr, 10);
+    for (let n = from; n <= to; n++) {
+      const stats = numberMastery[String(n)];
+      if (stats) {
+        countingCorrect += stats.countingCorrect;
+        feedCorrect += stats.feedCorrect;
+      }
+    }
+  }
+
+  if (!floor) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>Floor not found</Text>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backArrow}>← Go back</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
   const animals = ANIMALS.filter((a) => floor.animals.includes(a.id));
   const mainAnimal = animals[0];
-
-  const feedUnlocked = useIsMechanicUnlocked(firstGroup, 'feed');
-  const bubblesUnlocked = useIsMechanicUnlocked(firstGroup, 'bubbles');
-  const groupProgress = useGroupProgress(firstGroup);
-
   const [from, to] = floor.numberRange;
-  const countingProgress = groupProgress.countingCorrect;
-  const feedProgress = groupProgress.feedCorrect;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,7 +137,7 @@ export default function FloorMenu() {
         </View>
         {!bubblesUnlocked && (
           <Text style={styles.lockHint}>
-            Bubbles locked · {feedUnlocked ? `${feedProgress}/3 feeds` : `${countingProgress}/5 counts`}
+            Bubbles locked · {feedUnlocked ? `${feedCorrect}/3 feeds` : `${countingCorrect}/5 counts`}
           </Text>
         )}
 
@@ -126,8 +149,8 @@ export default function FloorMenu() {
           emoji="👆"
           isLocked={false}
           lockMessage=""
-          progressText={`${countingProgress} correct`}
-          progressPercent={Math.min((countingProgress / 10) * 100, 100)}
+          progressText={`${countingCorrect} correct`}
+          progressPercent={Math.min((countingCorrect / 10) * 100, 100)}
           color={COLORS.primary}
           onPress={() => router.push({ pathname: '/game/counting', params: { floorId: floor.id } })}
         />
@@ -137,11 +160,11 @@ export default function FloorMenu() {
           description={`Give the ${mainAnimal?.name.split(' ')[0].toLowerCase()} exactly the right number of treats`}
           emoji={mainAnimal?.treatEmoji || '🍎'}
           isLocked={!feedUnlocked}
-          lockMessage={`Complete ${FEED_UNLOCK_THRESHOLD - countingProgress} more counting rounds to unlock`}
-          progressText={feedUnlocked ? `${feedProgress} of 3 rounds done` : undefined}
-          progressPercent={feedUnlocked ? (feedProgress / 3) * 100 : 0}
+          lockMessage={`Complete ${Math.max(FEED_UNLOCK_THRESHOLD - countingCorrect, 0)} more counting rounds to unlock`}
+          progressText={feedUnlocked ? `${feedCorrect} of 3 rounds done` : undefined}
+          progressPercent={feedUnlocked ? (feedCorrect / 3) * 100 : 0}
           color={COLORS.celebration}
-          isNew={feedUnlocked && feedProgress === 0}
+          isNew={feedUnlocked && feedCorrect === 0}
           onPress={() => router.push({ pathname: '/game/feeding', params: { floorId: floor.id } })}
         />
 
@@ -150,7 +173,7 @@ export default function FloorMenu() {
           description="Pop each bubble and count them all"
           emoji="🫧"
           isLocked={!bubblesUnlocked}
-          lockMessage={`Complete ${BUBBLES_UNLOCK_THRESHOLD - feedProgress} more feeding rounds to unlock`}
+          lockMessage={`Complete ${Math.max(BUBBLES_UNLOCK_THRESHOLD - feedCorrect, 0)} more feeding rounds to unlock`}
           progressText={bubblesUnlocked ? 'Ready to play!' : undefined}
           progressPercent={0}
           color="#A4D2E1"
@@ -169,6 +192,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 32,
+  },
+  errorText: {
+    fontSize: 18,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: 40,
   },
   header: {
     flexDirection: 'row',
