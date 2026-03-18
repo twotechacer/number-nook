@@ -7,6 +7,7 @@ import { BubbleField } from '@/components/game/BubbleField';
 import { NumeralChoice } from '@/components/game/NumeralChoice';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
+import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
 
@@ -27,6 +28,7 @@ export default function BubblesGame() {
   // Auto-retry after wrong answer
   useEffect(() => {
     if (phase === 'wrong') {
+      setWrongPhrase(getRandomWrongPhrase());
       const timer = setTimeout(retryAnswer, 800);
       return () => clearTimeout(timer);
     }
@@ -55,6 +57,7 @@ export default function BubblesGame() {
   }, [phase, startRound]);
 
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
+  const [wrongPhrase, setWrongPhrase] = useState('');
 
   useEffect(() => {
     if (phase === 'correct') {
@@ -129,7 +132,7 @@ export default function BubblesGame() {
             ))}
           </View>
           {phase === 'wrong' && (
-            <Text style={styles.tryAgain}>Hmm, let's try again!</Text>
+            <Text style={styles.tryAgain}>{wrongPhrase}</Text>
           )}
         </View>
       )}
