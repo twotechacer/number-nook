@@ -1,0 +1,33 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Test undo button in feeding game
+# Pre-condition: Feed must be unlocked
+
+- launchApp
+
+# Skip onboarding if shown
+- tapOn:
+    text: "Skip for now"
+    optional: true
+
+# Navigate to Floor 1 → Feed
+- tapOn:
+    id: "floor-card-1"
+- tapOn:
+    text: "Feed the animals!"
+    optional: true
+
+# Feed one treat
+- tapOn:
+    id: "treat-0"
+    optional: true
+
+# Undo button should appear after first feed
+- assertVisible:
+    text: "Undo last"
+    optional: true
+
+# Tap undo
+- tapOn:
+    text: "Undo last"
+    optional: true
