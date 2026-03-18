@@ -5,6 +5,7 @@ import { selectNextNumber } from '@/engine/numberSelector';
 import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
+import { playSound } from '@/utils/audio';
 
 export type FeedingPhase =
   | 'idle'
@@ -58,6 +59,7 @@ export function useFeedingGame(floorId: FloorId) {
 
   const feedTreat = useCallback((index: number) => {
     hapticTap();
+    playSound('treat_feed');
     setState((prev) => {
       if (prev.phase !== 'feeding') return prev;
       if (prev.fedIndices.includes(index)) return prev; // already fed
@@ -83,11 +85,13 @@ export function useFeedingGame(floorId: FloorId) {
 
         if (answer === prev.targetNumber) {
           hapticSuccess();
+          playSound('correct_answer');
           recordAnswer(prev.targetNumber, 'feed', true);
           addStar();
           return { ...prev, phase: 'correct' };
         } else {
           hapticError();
+          playSound('wrong_answer');
           recordAnswer(prev.targetNumber, 'feed', false);
           return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
         }
@@ -104,6 +108,7 @@ export function useFeedingGame(floorId: FloorId) {
   }, []);
 
   const startTummyFull = useCallback(() => {
+    playSound('tummy_full');
     setState((prev) => {
       if (prev.phase !== 'correct') return prev;
       return { ...prev, phase: 'tummy_full' };

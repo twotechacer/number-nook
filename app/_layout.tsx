@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useGameStore } from '@/store/useGameStore';
+import { preloadSounds, unloadSounds } from '@/utils/audio';
 import { COLORS } from '@/data/colors';
 
 function SessionManager() {
@@ -13,14 +14,17 @@ function SessionManager() {
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
-    // Start session on mount
+    // Start session and preload audio on mount
     startSession();
+    preloadSounds();
 
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (appState.current.match(/active/) && nextState.match(/inactive|background/)) {
         endSession();
+        unloadSounds();
       } else if (appState.current.match(/inactive|background/) && nextState === 'active') {
         startSession();
+        preloadSounds();
       }
       appState.current = nextState;
     });
@@ -28,6 +32,7 @@ function SessionManager() {
     return () => {
       subscription.remove();
       endSession();
+      unloadSounds();
     };
   }, []);
 
