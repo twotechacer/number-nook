@@ -1,0 +1,30 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Navigate from home to Floor 1 menu
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Home screen
+- assertVisible: "Floor 1"
+
+# Tap Floor 1
+- tapOn:
+    id: "floor-card-1"
+
+# Floor menu should show
+- assertVisible: "Count it!"
+- assertVisible: "Feed the animals!"
+- assertVisible: "Pop the bubbles!"
+
+# Feed and Bubbles should show lock overlay messages
+- assertVisible: "counting rounds to unlock"
+
+# Go back to home
+- tapOn: "←"
+- assertVisible: "Number Nook"
+
+# Floor 2 should be locked
+- assertVisible: "🔒"

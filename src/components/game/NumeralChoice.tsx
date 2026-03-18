@@ -34,6 +34,7 @@ export function NumeralChoice({ value, onSelect, disabled = false, isCorrect = n
 
   return (
     <Pressable
+      testID={`choice-${value}`}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: bgColor, borderColor },

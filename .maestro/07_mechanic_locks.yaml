@@ -1,0 +1,30 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Verify mechanic lock states on Floor 1 menu
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Navigate to Floor 1
+- tapOn:
+    id: "floor-card-1"
+
+# Count it! should be unlocked (always available)
+- assertVisible: "Count it!"
+- assertVisible: "Tap each object and count how many"
+
+# Feed the animals should be locked
+- assertVisible: "Feed the animals!"
+- assertVisible: "counting rounds to unlock"
+
+# Pop the bubbles should be locked
+- assertVisible: "Pop the bubbles!"
+- assertVisible: "feeding rounds to unlock"
+
+# Status badges
+- assertVisible: "Counting active"
+
+# Lock hint at top
+- assertVisible: "Bubbles locked"
