@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCountingGame } from '@/hooks/useCountingGame';
 import { CountableObject } from '@/components/game/CountableObject';
 import { NumeralChoice } from '@/components/game/NumeralChoice';
+import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
@@ -59,6 +60,15 @@ export default function CountingGame() {
       return () => clearTimeout(timer);
     }
   }, [phase, startRound]);
+
+  const [sparkleTrigger, setSparkleTrigger] = useState(0);
+
+  // Sparkle on correct answer
+  useEffect(() => {
+    if (phase === 'correct') {
+      setSparkleTrigger((prev) => prev + 1);
+    }
+  }, [phase]);
 
   const animal = targetNumber > 0 ? getAnimalForNumber(targetNumber) : null;
   const emojis = OBJECT_EMOJIS[floorId] || OBJECT_EMOJIS.floor1;
@@ -132,6 +142,9 @@ export default function CountingGame() {
           )}
         </View>
       )}
+
+      {/* Subtle sparkles on correct answer */}
+      <Sparkles trigger={sparkleTrigger} count={8} spread={80} />
     </SafeAreaView>
   );
 }

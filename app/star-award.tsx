@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useGameStore } from '@/store/useGameStore';
+import { Sparkles } from '@/components/ui/Sparkles';
 import { COLORS } from '@/data/colors';
 
 export default function StarAward() {
@@ -33,6 +34,9 @@ export default function StarAward() {
         <Text style={styles.subtitle}>You earned a star!</Text>
         <Text style={styles.hint}>tap anywhere to continue</Text>
       </SafeAreaView>
+
+      {/* Celebration sparkles */}
+      <Sparkles trigger={1} count={10} spread={100} />
     </Pressable>
   );
 }
