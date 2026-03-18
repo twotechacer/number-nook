@@ -33,40 +33,46 @@ export function FloorCard({
     <Pressable
       style={({ pressed }) => [
         styles.card,
-        { backgroundColor: color + '30' },
+        { backgroundColor: isLocked ? 'rgba(0,0,0,0.03)' : color + '30' },
         pressed && !isLocked && styles.pressed,
       ]}
-      onPress={onPress}
-      disabled={isLocked}
+      onPress={isLocked ? undefined : onPress}
     >
-      {isLocked && <LockOverlay message={`Complete ${name.replace('Floor ', 'Floor ')} to unlock`} />}
-
       <View style={styles.row}>
-        <Text style={styles.emoji}>{animalEmojis}</Text>
+        <Text style={[styles.emoji, isLocked && styles.lockedEmoji]}>{animalEmojis}</Text>
         <View style={styles.info}>
           <Text style={styles.floorName}>{name}</Text>
           <Text style={styles.range}>{numberRange}</Text>
           <Text style={styles.animalLabel}>{animalLabel}</Text>
         </View>
+        {isLocked && <Text style={styles.lockIcon}>🔒</Text>}
       </View>
 
-      <View style={styles.phaseContainer}>
-        <Text style={[styles.phaseBadge, { backgroundColor: color + '50' }]}>
-          {phaseLabel}
-        </Text>
-      </View>
-
-      <View style={styles.progressContainer}>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${progress}%`, backgroundColor: color },
-            ]}
-          />
+      {!isLocked && (
+        <View style={styles.phaseContainer}>
+          <Text style={[styles.phaseBadge, { backgroundColor: color + '50' }]}>
+            {phaseLabel}
+          </Text>
         </View>
-        <Text style={styles.progressText}>{progressText}</Text>
-      </View>
+      )}
+
+      {isLocked ? (
+        <Text style={styles.lockMessage}>
+          Complete {floorNumber === 3 ? 'Floor 2' : 'Floor 1'} to unlock
+        </Text>
+      ) : (
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${progress}%`, backgroundColor: color },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressText}>{progressText}</Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -137,5 +143,16 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 13,
     color: COLORS.textSecondary,
+  },
+  lockedEmoji: {
+    opacity: 0.4,
+  },
+  lockIcon: {
+    fontSize: 24,
+  },
+  lockMessage: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
   },
 });
