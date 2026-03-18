@@ -1,0 +1,27 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Verify bubbles game navigation and back button
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Floor 1
+- tapOn:
+    id: "floor-card-1"
+
+# Bubbles should show as locked initially
+- assertVisible: "Pop the bubbles!"
+- assertVisible: "feeding rounds to unlock"
+
+# Count it should be accessible
+- tapOn: "Count it!"
+- assertVisible: "Counting"
+
+# Go back
+- tapOn:
+    id: "back-button"
+    optional: true
+- tapOn:
+    text: "←"
