@@ -1,0 +1,27 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Navigate to settings (requires solving parent gate)
+# Note: This flow can't solve the gate automatically since the answer is random
+# It verifies the gate appears and the cancel flow works
+
+- launchApp:
+    clearState: true
+
+# Enter name first
+- tapOn:
+    id: "name-input"
+- inputText: "Aria"
+- tapOn:
+    id: "start-button"
+
+# On home screen
+- assertVisible: "Hi Aria! Pick a floor"
+
+# Tap settings
+- tapOn: "👤"
+
+# Gate appears
+- assertVisible: "Parent Check"
+
+# We can't solve it automatically, but verify it renders correctly
+- assertVisible: "Solve this to continue"

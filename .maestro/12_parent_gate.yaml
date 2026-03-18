@@ -1,0 +1,20 @@
+appId: com.anonymous.numbernook
+---
+# Flow: Parent gate blocks access to settings, cancel goes back
+- launchApp:
+    clearState: true
+
+# Skip onboarding
+- tapOn: "Skip for now"
+
+# Tap settings button on home screen
+- tapOn: "👤"
+
+# Parent gate should appear
+- assertVisible: "Parent Check"
+- assertVisible: "Solve this to continue"
+- assertVisible: "← Go back"
+
+# Cancel should go back to home
+- tapOn: "← Go back"
+- assertVisible: "Number Nook"
