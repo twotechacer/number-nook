@@ -4,6 +4,7 @@ import { generateDistractors } from '@/engine/distractors';
 import { selectNextNumber } from '@/engine/numberSelector';
 import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
+import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
 
 export type FeedingPhase =
   | 'idle'
@@ -56,6 +57,7 @@ export function useFeedingGame(floorId: FloorId) {
   }, [mastery, floorRange]);
 
   const feedTreat = useCallback((index: number) => {
+    hapticTap();
     setState((prev) => {
       if (prev.phase !== 'feeding') return prev;
       if (prev.fedIndices.includes(index)) return prev; // already fed
@@ -80,10 +82,12 @@ export function useFeedingGame(floorId: FloorId) {
         if (prev.phase !== 'answering') return prev;
 
         if (answer === prev.targetNumber) {
+          hapticSuccess();
           recordAnswer(prev.targetNumber, 'feed', true);
           addStar();
           return { ...prev, phase: 'correct' };
         } else {
+          hapticError();
           recordAnswer(prev.targetNumber, 'feed', false);
           return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
         }

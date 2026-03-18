@@ -35,6 +35,8 @@ export function NumeralChoice({ value, onSelect, disabled = false, isCorrect = n
   return (
     <Pressable
       testID={`choice-${value}`}
+      accessibilityLabel={`Choose ${value}`}
+      accessibilityRole="button"
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: bgColor, borderColor },

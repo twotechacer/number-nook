@@ -4,6 +4,7 @@ import { generateDistractors } from '@/engine/distractors';
 import { selectNextNumber } from '@/engine/numberSelector';
 import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
+import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
 
 export type CountingPhase = 'idle' | 'tapping' | 'answering' | 'correct' | 'wrong' | 'complete';
 
@@ -49,6 +50,7 @@ export function useCountingGame(floorId: FloorId) {
   }, [mastery, floorRange]);
 
   const tapObject = useCallback(() => {
+    hapticTap();
     setState((prev) => {
       if (prev.phase !== 'tapping') return prev;
       const newCount = prev.tappedCount + 1;
@@ -65,10 +67,12 @@ export function useCountingGame(floorId: FloorId) {
         if (prev.phase !== 'answering') return prev;
 
         if (answer === prev.targetNumber) {
+          hapticSuccess();
           recordAnswer(prev.targetNumber, 'counting', true);
           addStar();
           return { ...prev, phase: 'correct' };
         } else {
+          hapticError();
           recordAnswer(prev.targetNumber, 'counting', false);
           return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
         }

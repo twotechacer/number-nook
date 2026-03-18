@@ -1,21 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useGameStore } from '@/store/useGameStore';
 import { Sparkles } from '@/components/ui/Sparkles';
+import { getRandomCorrectPhrase, getMilestoneMessage } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 
 export default function StarAward() {
   const params = useLocalSearchParams<{ number: string; floorId: string }>();
   const number = parseInt(params.number || '0', 10);
   const childName = useGameStore((s) => s.childName);
+  const totalStars = useGameStore((s) => s.totalStars);
 
-  // Auto-advance after 2 seconds
+  // Pick a random phrase once on mount
+  const [phrase] = useState(() => getRandomCorrectPhrase(childName || undefined));
+  const milestone = getMilestoneMessage(totalStars);
+
+  // Auto-advance after 2 seconds (3s if milestone)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (router.canGoBack()) router.back();
-    }, 2000);
+    }, milestone ? 3000 : 2000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -28,15 +34,21 @@ export default function StarAward() {
       <SafeAreaView style={styles.safeArea}>
         <Text style={styles.star}>⭐</Text>
         <Text style={styles.number}>{number}</Text>
-        <Text style={styles.title}>
-          {childName ? `Well done, ${childName}!` : 'Well done!'}
-        </Text>
+        <Text style={styles.title}>{phrase}</Text>
         <Text style={styles.subtitle}>You earned a star!</Text>
+
+        {milestone && (
+          <>
+            <Text style={styles.milestoneTitle}>{milestone.title}</Text>
+            <Text style={styles.milestoneSubtitle}>{milestone.subtitle}</Text>
+          </>
+        )}
+
         <Text style={styles.hint}>tap anywhere to continue</Text>
       </SafeAreaView>
 
       {/* Celebration sparkles */}
-      <Sparkles trigger={1} count={10} spread={100} />
+      <Sparkles trigger={1} count={milestone ? 14 : 10} spread={100} />
     </Pressable>
   );
 }
@@ -66,11 +78,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     marginBottom: 4,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   subtitle: {
     fontSize: 18,
     color: COLORS.textPrimary + 'CC',
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  milestoneTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  milestoneSubtitle: {
+    fontSize: 16,
+    color: COLORS.primary + 'CC',
+    marginBottom: 16,
   },
   hint: {
     fontSize: 14,

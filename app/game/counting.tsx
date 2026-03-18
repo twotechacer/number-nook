@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCountingGame } from '@/hooks/useCountingGame';
 import { CountableObject } from '@/components/game/CountableObject';
+import { TeensFrame } from '@/components/game/TeensFrame';
 import { NumeralChoice } from '@/components/game/NumeralChoice';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
+import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
 
@@ -34,6 +36,7 @@ export default function CountingGame() {
   // Auto-retry after wrong answer shake
   useEffect(() => {
     if (phase === 'wrong') {
+      setWrongPhrase(getRandomWrongPhrase());
       const timer = setTimeout(retryAnswer, 800);
       return () => clearTimeout(timer);
     }
@@ -62,6 +65,7 @@ export default function CountingGame() {
   }, [phase, startRound]);
 
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
+  const [wrongPhrase, setWrongPhrase] = useState('');
 
   // Sparkle on correct answer
   useEffect(() => {
@@ -97,18 +101,27 @@ export default function CountingGame() {
         <Text style={styles.headerEmoji}>{animal?.emoji}</Text>
       </View>
 
-      {/* Object field */}
-      <View testID="object-field" style={styles.objectField}>
-        {Array.from({ length: targetNumber }, (_, i) => (
-          <CountableObject
-            key={i}
-            index={i}
-            isTapped={tappedSet.has(i)}
-            emoji={objectEmoji}
-            onTap={tapObject}
-          />
-        ))}
-      </View>
+      {/* Object field — use TeensFrame for 11-19, regular layout otherwise */}
+      {targetNumber >= 11 && targetNumber <= 19 ? (
+        <TeensFrame
+          targetNumber={targetNumber}
+          tappedSet={tappedSet}
+          emoji={objectEmoji}
+          onTap={tapObject}
+        />
+      ) : (
+        <View testID="object-field" style={styles.objectField}>
+          {Array.from({ length: targetNumber }, (_, i) => (
+            <CountableObject
+              key={i}
+              index={i}
+              isTapped={tappedSet.has(i)}
+              emoji={objectEmoji}
+              onTap={tapObject}
+            />
+          ))}
+        </View>
+      )}
 
       {/* Counter */}
       <View testID="counter-container" style={styles.counterContainer}>
@@ -138,7 +151,7 @@ export default function CountingGame() {
             ))}
           </View>
           {phase === 'wrong' && (
-            <Text style={styles.tryAgain}>Hmm, let's try again!</Text>
+            <Text style={styles.tryAgain}>{wrongPhrase}</Text>
           )}
         </View>
       )}

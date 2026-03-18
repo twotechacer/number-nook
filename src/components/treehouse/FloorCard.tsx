@@ -32,6 +32,9 @@ export function FloorCard({
   return (
     <Pressable
       testID={`floor-card-${floorNumber}`}
+      accessibilityLabel={isLocked ? `${name}, locked` : `${name}, ${numberRange}`}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isLocked }}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: isLocked ? 'rgba(0,0,0,0.03)' : color + '30' },
