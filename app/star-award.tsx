@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useGameStore } from '@/store/useGameStore';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { getRandomCorrectPhrase, getMilestoneMessage } from '@/data/phrases';
+import { playSound } from '@/utils/audio';
 import { COLORS } from '@/data/colors';
 
 export default function StarAward() {
@@ -16,6 +17,11 @@ export default function StarAward() {
   // Pick a random phrase once on mount
   const [phrase] = useState(() => getRandomCorrectPhrase(childName || undefined));
   const milestone = getMilestoneMessage(totalStars);
+
+  // Play star sound on mount
+  useEffect(() => {
+    playSound('star_earned');
+  }, []);
 
   // Auto-advance after 2 seconds (3s if milestone)
   useEffect(() => {

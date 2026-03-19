@@ -5,6 +5,7 @@ import { selectNextNumber } from '@/engine/numberSelector';
 import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
+import { playSound } from '@/utils/audio';
 
 export type BubblesPhase = 'idle' | 'popping' | 'answering' | 'correct' | 'wrong' | 'complete';
 
@@ -51,6 +52,7 @@ export function useBubblesGame(floorId: FloorId) {
 
   const popBubble = useCallback(() => {
     hapticTap();
+    playSound('bubble_pop');
     setState((prev) => {
       if (prev.phase !== 'popping') return prev;
       const newCount = prev.poppedCount + 1;
@@ -68,11 +70,13 @@ export function useBubblesGame(floorId: FloorId) {
 
         if (answer === prev.targetNumber) {
           hapticSuccess();
+          playSound('correct_answer');
           recordAnswer(prev.targetNumber, 'bubbles', true);
           addStar();
           return { ...prev, phase: 'correct' };
         } else {
           hapticError();
+          playSound('wrong_answer');
           recordAnswer(prev.targetNumber, 'bubbles', false);
           return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
         }

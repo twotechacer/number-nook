@@ -11,10 +11,19 @@ jest.mock('expo-haptics', () => ({
 jest.mock('expo-av', () => ({
   Audio: {
     Sound: {
-      createAsync: jest.fn().mockResolvedValue({ sound: { playAsync: jest.fn(), unloadAsync: jest.fn() } }),
+      createAsync: jest.fn().mockResolvedValue({
+        sound: { playAsync: jest.fn(), replayAsync: jest.fn(), unloadAsync: jest.fn() },
+      }),
     },
     setAudioModeAsync: jest.fn(),
   },
+}));
+
+// Mock audio utility (fire-and-forget, non-critical)
+jest.mock('@/utils/audio', () => ({
+  preloadSounds: jest.fn().mockResolvedValue(undefined),
+  playSound: jest.fn(),
+  unloadSounds: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock @react-native-async-storage/async-storage

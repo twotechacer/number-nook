@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { COLORS } from '@/data/colors';
+import { playSound } from '@/utils/audio';
 
 interface UnlockBannerProps {
   message: string;
@@ -15,6 +16,7 @@ export function UnlockBanner({ message, emoji, visible, onDismiss }: UnlockBanne
 
   useEffect(() => {
     if (visible) {
+      playSound('unlock');
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
