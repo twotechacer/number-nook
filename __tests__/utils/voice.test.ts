@@ -89,13 +89,21 @@ describe('speakFindPrompt', () => {
   it('formats with "Find" prefix and number word', () => {
     speakFindPrompt(10);
     const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
-    expect(text).toBe('Find ten');
+    expect(text).toContain('Find');
+    expect(text).toContain('ten');
   });
 
   it('falls back to string for numbers outside dictionary', () => {
     speakFindPrompt(99);
     const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
-    expect(text).toBe('Find 99');
+    expect(text).toContain('Find');
+    expect(text).toContain('99');
+  });
+
+  it('uses slow rate for child-friendly pacing', () => {
+    speakFindPrompt(5);
+    const opts = (Speech.speak as jest.Mock).mock.calls[0][1];
+    expect(opts.rate).toBeLessThanOrEqual(0.6);
   });
 });
 
@@ -103,7 +111,9 @@ describe('speakFindRetry', () => {
   it('formats with "Try again" prefix and number word', () => {
     speakFindRetry(4);
     const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
-    expect(text).toBe('Try again. Find four');
+    expect(text).toContain('Try again');
+    expect(text).toContain('Find');
+    expect(text).toContain('four');
   });
 });
 

@@ -10,7 +10,7 @@ import { getFloorById } from '@/data/floors';
 import { COLORS } from '@/data/colors';
 import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 import { FloorId } from '@/types/game';
-import { speakFindPrompt, speakFindRetry } from '@/utils/voice';
+import { speakFindPrompt, speakFindRetry, stopSpeech } from '@/utils/voice';
 
 export default function FindNumberGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
@@ -48,9 +48,10 @@ export default function FindNumberGame() {
     }
   }, [phase, targetNumber, retryAnswer]);
 
-  // Handle correct answer: navigate to star award
+  // Handle correct answer: stop speech, navigate to star award
   useEffect(() => {
     if (phase === 'correct') {
+      stopSpeech();
       setSparkleTrigger((prev) => prev + 1);
       const timer = setTimeout(() => {
         router.push({

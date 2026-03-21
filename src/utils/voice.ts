@@ -33,10 +33,14 @@ export function speakCorrectFeedback(number: number, childName?: string): void {
 
 export function speakFindPrompt(number: number): void {
   const numWord = NUMBER_WORDS[number] || String(number);
-  speak(`Find ${numWord}`, 0.75);
+  speak(`Find ... ${numWord}`, 0.55);
 }
 
 export function speakFindRetry(number: number): void {
   const numWord = NUMBER_WORDS[number] || String(number);
-  speak(`Try again. Find ${numWord}`, 0.7);
+  speak(`Try again. ... Find ${numWord}`, 0.55);
+}
+
+export function stopSpeech(): void {
+  Speech.stop();
 }
