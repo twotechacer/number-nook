@@ -6,8 +6,9 @@ import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
 import { playSound } from '@/utils/audio';
+import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 
-export type BubblesPhase = 'idle' | 'popping' | 'answering' | 'correct' | 'wrong' | 'complete';
+export type BubblesPhase = 'idle' | 'popping' | 'answering' | 'correct' | 'wrong' | 'strike_out' | 'complete';
 
 interface BubblesGameState {
   phase: BubblesPhase;
@@ -78,7 +79,11 @@ export function useBubblesGame(floorId: FloorId) {
           hapticError();
           playSound('wrong_answer');
           recordAnswer(prev.targetNumber, 'bubbles', false);
-          return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
+          const newAttempts = prev.attempts + 1;
+          if (newAttempts >= MAX_ANSWER_ATTEMPTS) {
+            return { ...prev, phase: 'strike_out', attempts: newAttempts };
+          }
+          return { ...prev, phase: 'wrong', attempts: newAttempts };
         }
       });
     },
@@ -92,6 +97,20 @@ export function useBubblesGame(floorId: FloorId) {
     });
   }, []);
 
+  const restartSameRound = useCallback(() => {
+    setState((prev) => {
+      if (prev.phase !== 'strike_out') return prev;
+      const choices = generateDistractors(prev.targetNumber);
+      return {
+        ...prev,
+        phase: 'popping',
+        poppedCount: 0,
+        answerChoices: choices,
+        attempts: 0,
+      };
+    });
+  }, []);
+
   const completeRound = useCallback(() => {
     setState((prev) => ({ ...prev, phase: 'complete' }));
   }, []);
@@ -102,6 +121,7 @@ export function useBubblesGame(floorId: FloorId) {
     popBubble,
     selectAnswer,
     retryAnswer,
+    restartSameRound,
     completeRound,
   };
 }

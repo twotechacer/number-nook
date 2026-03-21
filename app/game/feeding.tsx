@@ -11,6 +11,7 @@ import { getAnimalForNumber } from '@/data/animals';
 import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
+import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 
 export default function FeedingGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
@@ -19,7 +20,7 @@ export default function FeedingGame() {
   const {
     phase, targetNumber, fedCount, fedIndices, answerChoices, attempts,
     startRound, feedTreat, undoTreat, selectAnswer, retryAnswer,
-    startTummyFull, completeRound,
+    restartSameRound, startTummyFull, completeRound,
   } = useFeedingGame(floorId);
 
   // Start first round on mount
@@ -27,14 +28,24 @@ export default function FeedingGame() {
     if (phase === 'idle') startRound();
   }, [phase, startRound]);
 
-  // Auto-retry after wrong answer
+  // Auto-retry after wrong answer (only if not at max attempts)
   useEffect(() => {
     if (phase === 'wrong') {
       setWrongPhrase(getRandomWrongPhrase());
-      const timer = setTimeout(retryAnswer, 800);
+      if (attempts < MAX_ANSWER_ATTEMPTS) {
+        const timer = setTimeout(retryAnswer, 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [phase, retryAnswer, attempts]);
+
+  // Strike-out: auto-advance after delay
+  useEffect(() => {
+    if (phase === 'strike_out') {
+      const timer = setTimeout(restartSameRound, 1500);
       return () => clearTimeout(timer);
     }
-  }, [phase, retryAnswer]);
+  }, [phase, restartSameRound]);
 
   // Trigger tummy-full after correct
   useEffect(() => {
@@ -154,9 +165,28 @@ export default function FeedingGame() {
               />
             ))}
           </View>
+          {/* Strike indicator */}
+          <View style={styles.strikeRow}>
+            {Array.from({ length: MAX_ANSWER_ATTEMPTS }, (_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.strikeDot,
+                  i < attempts ? styles.strikeDotFilled : styles.strikeDotEmpty,
+                ]}
+              />
+            ))}
+          </View>
           {phase === 'wrong' && (
             <Text style={styles.tryAgain}>{wrongPhrase}</Text>
           )}
+        </View>
+      )}
+
+      {/* Strike-out overlay */}
+      {phase === 'strike_out' && (
+        <View style={styles.strikeOutOverlay}>
+          <Text style={styles.strikeOutText}>Let's try again!</Text>
         </View>
       )}
 
@@ -259,5 +289,35 @@ const styles = StyleSheet.create({
     color: COLORS.wrong,
     marginTop: 12,
     fontStyle: 'italic',
+  },
+  strikeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    justifyContent: 'center',
+  },
+  strikeDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  strikeDotFilled: {
+    backgroundColor: COLORS.textPrimary,
+  },
+  strikeDotEmpty: {
+    borderWidth: 1.5,
+    borderColor: COLORS.textSecondary,
+    backgroundColor: 'transparent',
+  },
+  strikeOutOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  strikeOutText: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#E8A838',
   },
 });

@@ -22,7 +22,15 @@ export function selectNextNumber(
   const weights = candidates.map((n) => {
     const stats = mastery[String(n)];
     if (!stats || (stats.correct === 0 && stats.wrong === 0)) return 10;
-    if (!isNumberMastered(stats)) return 7;
+    if (!isNumberMastered(stats)) {
+      let weight = 7;
+      const totalAttempts = stats.correct + stats.wrong;
+      if (totalAttempts > 0) {
+        const errorRatio = stats.wrong / totalAttempts;
+        weight += Math.round(errorRatio * 8);
+      }
+      return weight;
+    }
     const daysSinceLastPlayed =
       stats.lastPlayed > 0
         ? (Date.now() - stats.lastPlayed) / (1000 * 60 * 60 * 24)

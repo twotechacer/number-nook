@@ -12,3 +12,6 @@ export const FLOOR_MASTERY_PERCENT = 0.8;
 
 /** Maximum session log entries to keep */
 export const MAX_SESSION_LOG = 30;
+
+/** Maximum wrong-answer attempts before a strike-out restart */
+export const MAX_ANSWER_ATTEMPTS = 3;

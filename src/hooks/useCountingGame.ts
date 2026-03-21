@@ -6,8 +6,9 @@ import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
 import { playSound } from '@/utils/audio';
+import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 
-export type CountingPhase = 'idle' | 'tapping' | 'answering' | 'correct' | 'wrong' | 'complete';
+export type CountingPhase = 'idle' | 'tapping' | 'answering' | 'correct' | 'wrong' | 'strike_out' | 'complete';
 
 interface CountingGameState {
   phase: CountingPhase;
@@ -80,7 +81,11 @@ export function useCountingGame(floorId: FloorId) {
           hapticError();
           playSound('wrong_answer');
           recordAnswer(prev.targetNumber, 'counting', false);
-          return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
+          const newAttempts = prev.attempts + 1;
+          if (newAttempts >= MAX_ANSWER_ATTEMPTS) {
+            return { ...prev, phase: 'strike_out', attempts: newAttempts };
+          }
+          return { ...prev, phase: 'wrong', attempts: newAttempts };
         }
       });
     },
@@ -91,6 +96,20 @@ export function useCountingGame(floorId: FloorId) {
     setState((prev) => {
       if (prev.phase !== 'wrong') return prev;
       return { ...prev, phase: 'answering' };
+    });
+  }, []);
+
+  const restartSameRound = useCallback(() => {
+    setState((prev) => {
+      if (prev.phase !== 'strike_out') return prev;
+      const choices = generateDistractors(prev.targetNumber);
+      return {
+        ...prev,
+        phase: 'tapping',
+        tappedIndices: new Set<number>(),
+        answerChoices: choices,
+        attempts: 0,
+      };
     });
   }, []);
 
@@ -105,6 +124,7 @@ export function useCountingGame(floorId: FloorId) {
     tapObject,
     selectAnswer,
     retryAnswer,
+    restartSameRound,
     completeRound,
   };
 }

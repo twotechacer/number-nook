@@ -6,6 +6,7 @@ import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
 import { playSound } from '@/utils/audio';
+import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 
 export type FeedingPhase =
   | 'idle'
@@ -14,6 +15,7 @@ export type FeedingPhase =
   | 'correct'
   | 'tummy_full'
   | 'wrong'
+  | 'strike_out'
   | 'complete';
 
 interface FeedingGameState {
@@ -93,7 +95,11 @@ export function useFeedingGame(floorId: FloorId) {
           hapticError();
           playSound('wrong_answer');
           recordAnswer(prev.targetNumber, 'feed', false);
-          return { ...prev, phase: 'wrong', attempts: prev.attempts + 1 };
+          const newAttempts = prev.attempts + 1;
+          if (newAttempts >= MAX_ANSWER_ATTEMPTS) {
+            return { ...prev, phase: 'strike_out', attempts: newAttempts };
+          }
+          return { ...prev, phase: 'wrong', attempts: newAttempts };
         }
       });
     },
@@ -115,6 +121,20 @@ export function useFeedingGame(floorId: FloorId) {
     });
   }, []);
 
+  const restartSameRound = useCallback(() => {
+    setState((prev) => {
+      if (prev.phase !== 'strike_out') return prev;
+      const choices = generateDistractors(prev.targetNumber);
+      return {
+        ...prev,
+        phase: 'feeding',
+        fedIndices: [],
+        answerChoices: choices,
+        attempts: 0,
+      };
+    });
+  }, []);
+
   const completeRound = useCallback(() => {
     setState((prev) => ({ ...prev, phase: 'complete' }));
   }, []);
@@ -127,6 +147,7 @@ export function useFeedingGame(floorId: FloorId) {
     undoTreat,
     selectAnswer,
     retryAnswer,
+    restartSameRound,
     startTummyFull,
     completeRound,
   };
