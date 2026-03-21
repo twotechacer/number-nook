@@ -16,15 +16,15 @@ function SessionManager() {
   useEffect(() => {
     // Start session and preload audio on mount
     startSession();
-    preloadSounds();
+    preloadSounds().catch(() => {});
 
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (appState.current.match(/active/) && nextState.match(/inactive|background/)) {
         endSession();
-        unloadSounds();
+        unloadSounds().catch(() => {});
       } else if (appState.current.match(/inactive|background/) && nextState === 'active') {
         startSession();
-        preloadSounds();
+        preloadSounds().catch(() => {});
       }
       appState.current = nextState;
     });
@@ -32,7 +32,7 @@ function SessionManager() {
     return () => {
       subscription.remove();
       endSession();
-      unloadSounds();
+      unloadSounds().catch(() => {});
     };
   }, []);
 

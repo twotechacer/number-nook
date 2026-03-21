@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import { BubbleField } from '@/components/game/BubbleField';
 
 // We need to mock the layout event since it won't fire in test environment
@@ -16,7 +16,9 @@ describe('BubbleField', () => {
   beforeEach(() => jest.clearAllMocks());
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
   });
 
   it('renders the field container', () => {

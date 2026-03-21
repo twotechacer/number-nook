@@ -5,6 +5,8 @@ import { FloorId } from '@/types/game';
 import { FLOORS } from '@/data/floors';
 import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 import { hapticTap, hapticSuccess, hapticError } from '@/utils/haptics';
+import { playSound } from '@/utils/audio';
+import { shuffle } from '@/utils/numberHelpers';
 
 export type FindPhase = 'idle' | 'listening' | 'correct' | 'wrong' | 'strike_out' | 'complete';
 
@@ -22,10 +24,9 @@ export function generateFindChoices(target: number, floorRange: [number, number]
   for (let n = from; n <= to; n++) {
     if (n !== target) pool.push(n);
   }
-  // Shuffle pool and take first (count - 1)
-  const shuffled = pool.sort(() => Math.random() - 0.5);
+  const shuffled = shuffle(pool);
   const distractors = shuffled.slice(0, count - 1);
-  return [target, ...distractors].sort(() => Math.random() - 0.5);
+  return shuffle([target, ...distractors]);
 }
 
 export function useFindNumberGame(floorId: FloorId) {
@@ -62,6 +63,7 @@ export function useFindNumberGame(floorId: FloorId) {
 
   const selectNumber = useCallback(
     (n: number) => {
+      playSound('object_tap');
       setState((prev) => {
         if (prev.phase !== 'listening') return prev;
 

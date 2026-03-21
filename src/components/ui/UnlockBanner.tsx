@@ -53,6 +53,8 @@ export function UnlockBanner({ message, emoji, visible, onDismiss }: UnlockBanne
 
   return (
     <Animated.View
+      accessibilityRole="alert"
+      accessibilityLabel={message}
       style={[
         styles.banner,
         {

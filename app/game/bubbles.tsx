@@ -27,6 +27,10 @@ export default function BubblesGame() {
   const [roundNumber, setRoundNumber] = useState(1);
   const [showHint, setShowHint] = useState(false);
 
+  useEffect(() => {
+    setRoundNumber(1);
+  }, []);
+
   // Start first round on mount
   useEffect(() => {
     if (phase === 'idle') startRound();

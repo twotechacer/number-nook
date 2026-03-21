@@ -85,6 +85,8 @@ export default function Home() {
             </Text>
           </View>
           <Pressable
+            accessibilityLabel="Settings"
+            accessibilityRole="button"
             style={styles.settingsButton}
             onPress={() => router.push('/(parent)/settings')}
           >

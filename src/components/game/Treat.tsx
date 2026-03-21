@@ -22,6 +22,9 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
       delay: index * 60,
       useNativeDriver: true,
     }).start();
+    return () => {
+      scaleAnim.stopAnimation();
+    };
   }, []);
 
   // Fly-to-animal animation when fed, restore when unfed (undo)
@@ -51,6 +54,10 @@ export function Treat({ index, emoji, isFed, onTap }: TreatProps) {
         useNativeDriver: true,
       }).start();
     }
+    return () => {
+      flyAnim.stopAnimation();
+      scaleAnim.stopAnimation();
+    };
   }, [isFed]);
 
   return (

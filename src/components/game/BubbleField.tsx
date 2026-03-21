@@ -102,7 +102,10 @@ export function BubbleField({ count, poppedCount, color, onPop }: BubbleFieldPro
     }, TICK_MS);
 
     return () => {
-      if (animRef.current) clearInterval(animRef.current);
+      if (animRef.current) {
+        clearInterval(animRef.current);
+        animRef.current = null;
+      }
     };
   }, [positions.length > 0, fieldSize]);
 

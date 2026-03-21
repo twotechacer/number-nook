@@ -81,6 +81,8 @@ export function Bubble({ index, isPopped, color, size, position, onPop, isLastTw
   return (
     <Pressable
       testID={`bubble-${index}`}
+      accessibilityLabel="Pop bubble"
+      accessibilityRole="button"
       onPress={onPop}
       style={{ position: 'absolute', left: position.x, top: position.y }}
     >
