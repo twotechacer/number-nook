@@ -10,5 +10,11 @@ export const MASTERY_THRESHOLD = 3;
 /** Percentage of numbers mastered on a floor to unlock the next floor */
 export const FLOOR_MASTERY_PERCENT = 0.8;
 
+/** Number of correct bubble rounds in a group to unlock Find */
+export const FIND_UNLOCK_THRESHOLD = 3;
+
+/** Maximum wrong attempts before strike-out in Find the Number */
+export const MAX_ANSWER_ATTEMPTS = 3;
+
 /** Maximum session log entries to keep */
 export const MAX_SESSION_LOG = 30;

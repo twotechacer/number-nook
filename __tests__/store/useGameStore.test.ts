@@ -8,7 +8,7 @@ describe('useGameStore', () => {
     it('has 0 stars', () => expect(useGameStore.getState().totalStars).toBe(0));
     it('has empty name', () => expect(useGameStore.getState().childName).toBe(''));
     it('all mechanics locked', () => {
-      expect(useGameStore.getState().mechanicUnlocks['1_10']).toEqual({ feed: false, bubbles: false });
+      expect(useGameStore.getState().mechanicUnlocks['1_10']).toEqual({ feed: false, bubbles: false, find: false });
     });
     it('all floors locked', () => expect(useGameStore.getState().floorUnlocks).toEqual({ floor2: false, floor3: false }));
   });

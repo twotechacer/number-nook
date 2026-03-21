@@ -13,6 +13,7 @@ function createEmptyNumberStats(): NumberStats {
     countingCorrect: 0,
     feedCorrect: 0,
     bubblesCorrect: 0,
+    findCorrect: 0,
   };
 }
 
@@ -28,7 +29,7 @@ function createEmptyMechanicUnlocks(): MechanicUnlockMap {
   const groups: NumberGroupKey[] = ['1_10', '11_20', '21_30', '31_40', '41_50'];
   const unlocks = {} as MechanicUnlockMap;
   for (const group of groups) {
-    unlocks[group] = { feed: false, bubbles: false };
+    unlocks[group] = { feed: false, bubbles: false, find: false };
   }
   return unlocks;
 }
