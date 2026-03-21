@@ -26,6 +26,22 @@ jest.mock('@/utils/audio', () => ({
   unloadSounds: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock expo-speech
+jest.mock('expo-speech', () => ({
+  speak: jest.fn(),
+  stop: jest.fn(),
+  isSpeakingAsync: jest.fn().mockResolvedValue(false),
+}));
+
+// Mock voice utility
+jest.mock('@/utils/voice', () => ({
+  speakNumber: jest.fn(),
+  speakWrongFeedback: jest.fn(),
+  speakCorrectFeedback: jest.fn(),
+  speakFindPrompt: jest.fn(),
+  speakFindRetry: jest.fn(),
+}));
+
 // Mock @react-native-async-storage/async-storage
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
