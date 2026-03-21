@@ -1,6 +1,6 @@
 import { NumberStats, MechanicUnlockMap, FloorUnlocks, NumberGroupKey } from '@/types/game';
 import { NUMBER_GROUPS } from '@/data/floors';
-import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD, FLOOR_MASTERY_PERCENT } from '@/data/thresholds';
+import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD, FIND_UNLOCK_THRESHOLD, FLOOR_MASTERY_PERCENT } from '@/data/thresholds';
 import { countMastered } from './mastery';
 
 /**
@@ -22,10 +22,15 @@ export function computeMechanicUnlocks(
       (sum, n) => sum + (mastery[String(n)]?.feedCorrect ?? 0),
       0
     );
+    const totalBubblesCorrect = numbers.reduce(
+      (sum, n) => sum + (mastery[String(n)]?.bubblesCorrect ?? 0),
+      0
+    );
 
     result[groupKey as NumberGroupKey] = {
       feed: totalCountingCorrect >= FEED_UNLOCK_THRESHOLD,
       bubbles: totalFeedCorrect >= BUBBLES_UNLOCK_THRESHOLD,
+      find: totalBubblesCorrect >= FIND_UNLOCK_THRESHOLD,
     };
   }
 

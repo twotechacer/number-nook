@@ -1,7 +1,7 @@
 // ─── Primitives ───────────────────────────────────────────
 export type VoicePreference = 'mum' | 'dad' | 'default';
 export type MasteryStatus = 'not_started' | 'practiced' | 'mastered';
-export type MechanicType = 'counting' | 'feed' | 'bubbles';
+export type MechanicType = 'counting' | 'feed' | 'bubbles' | 'find';
 export type FloorId = 'floor1' | 'floor2' | 'floor3';
 export type NumberGroupKey = '1_10' | '11_20' | '21_30' | '31_40' | '41_50';
 
@@ -13,12 +13,14 @@ export interface NumberStats {
   countingCorrect: number;
   feedCorrect: number;
   bubblesCorrect: number;
+  findCorrect: number;
 }
 
 // ─── Mechanic Unlocks ─────────────────────────────────────
 export interface GroupMechanicUnlocks {
   feed: boolean;
   bubbles: boolean;
+  find: boolean;
 }
 
 export type MechanicUnlockMap = Record<NumberGroupKey, GroupMechanicUnlocks>;
