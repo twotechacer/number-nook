@@ -12,6 +12,8 @@ import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
 import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
+import { useGameStore } from '@/store/useGameStore';
+import { speakWrongFeedback, speakCorrectFeedback } from '@/utils/voice';
 
 export default function FeedingGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
@@ -23,15 +25,20 @@ export default function FeedingGame() {
     restartSameRound, startTummyFull, completeRound,
   } = useFeedingGame(floorId);
 
+  const childName = useGameStore((s) => s.childName);
+  const [showHint, setShowHint] = useState(false);
+
   // Start first round on mount
   useEffect(() => {
     if (phase === 'idle') startRound();
   }, [phase, startRound]);
 
-  // Auto-retry after wrong answer (only if not at max attempts)
+  // Voice + hint on wrong answer, auto-retry if under max attempts
   useEffect(() => {
     if (phase === 'wrong') {
       setWrongPhrase(getRandomWrongPhrase());
+      setTimeout(() => speakWrongFeedback(attempts - 1), 200);
+      if (attempts >= 2) setShowHint(true);
       if (attempts < MAX_ANSWER_ATTEMPTS) {
         const timer = setTimeout(retryAnswer, 800);
         return () => clearTimeout(timer);
@@ -46,6 +53,14 @@ export default function FeedingGame() {
       return () => clearTimeout(timer);
     }
   }, [phase, restartSameRound]);
+
+  // Voice praise on correct
+  useEffect(() => {
+    if (phase === 'correct') {
+      setShowHint(false);
+      setTimeout(() => speakCorrectFeedback(targetNumber, childName || undefined), 200);
+    }
+  }, [phase, targetNumber, childName]);
 
   // Trigger tummy-full after correct
   useEffect(() => {
@@ -162,6 +177,7 @@ export default function FeedingGame() {
                 onSelect={selectAnswer}
                 disabled={phase !== 'answering'}
                 isCorrect={null}
+                isHinted={showHint && choice === targetNumber}
               />
             ))}
           </View>
