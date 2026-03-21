@@ -16,7 +16,7 @@ import { MAX_SESSION_LOG } from '@/data/thresholds';
 
 export interface UnlockEvent {
   type: 'mechanic' | 'floor';
-  mechanic?: 'feed' | 'bubbles';
+  mechanic?: 'feed' | 'bubbles' | 'find';
   floorId?: 'floor2' | 'floor3';
   groupKey?: string;
 }
@@ -78,6 +78,7 @@ export const useGameStore = create<GameStore>()(
             if (mechanic === 'counting') updated.countingCorrect += 1;
             else if (mechanic === 'feed') updated.feedCorrect += 1;
             else if (mechanic === 'bubbles') updated.bubblesCorrect += 1;
+            else if (mechanic === 'find') updated.findCorrect += 1;
           } else {
             updated.wrong += 1;
           }
@@ -97,6 +98,7 @@ export const useGameStore = create<GameStore>()(
             mergedMechanicUnlocks[groupKey] = {
               feed: mergedMechanicUnlocks[groupKey].feed || unlocks.feed,
               bubbles: mergedMechanicUnlocks[groupKey].bubbles || unlocks.bubbles,
+              find: mergedMechanicUnlocks[groupKey].find || unlocks.find,
             };
           }
 
@@ -109,6 +111,9 @@ export const useGameStore = create<GameStore>()(
             }
             if (!prev.bubbles && unlocks.bubbles) {
               unlockEvents.push({ type: 'mechanic', mechanic: 'bubbles', groupKey: gk });
+            }
+            if (!prev.find && unlocks.find) {
+              unlockEvents.push({ type: 'mechanic', mechanic: 'find', groupKey: gk });
             }
           }
           if (!state.floorUnlocks.floor2 && newFloorUnlocks.floor2) {

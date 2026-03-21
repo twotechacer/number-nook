@@ -2,14 +2,14 @@ import { computeMechanicUnlocks, computeFloorUnlocks } from '@/engine/unlocks';
 import { NumberStats } from '@/types/game';
 
 const s = (o: Partial<NumberStats> = {}): NumberStats => ({
-  correct: 0, wrong: 0, lastPlayed: 0, countingCorrect: 0, feedCorrect: 0, bubblesCorrect: 0, ...o,
+  correct: 0, wrong: 0, lastPlayed: 0, countingCorrect: 0, feedCorrect: 0, bubblesCorrect: 0, findCorrect: 0, ...o,
 });
 
 describe('computeMechanicUnlocks', () => {
   it('all false for empty mastery', () => {
     const r = computeMechanicUnlocks({});
-    expect(r['1_10']).toEqual({ feed: false, bubbles: false });
-    expect(r['41_50']).toEqual({ feed: false, bubbles: false });
+    expect(r['1_10']).toEqual({ feed: false, bubbles: false, find: false });
+    expect(r['41_50']).toEqual({ feed: false, bubbles: false, find: false });
   });
 
   it('unlocks feed at 5 counting correct in group', () => {

@@ -15,3 +15,6 @@ export const MAX_SESSION_LOG = 30;
 
 /** Maximum wrong-answer attempts before a strike-out restart */
 export const MAX_ANSWER_ATTEMPTS = 3;
+
+/** Number of correct bubble rounds in a group to unlock Find the Number */
+export const FIND_UNLOCK_THRESHOLD = 3;

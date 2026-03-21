@@ -10,6 +10,7 @@ export function useIsMechanicUnlocked(groupKey: NumberGroupKey, mechanic: Mechan
     if (mechanic === 'counting') return true;
     if (mechanic === 'feed') return state.mechanicUnlocks[groupKey].feed;
     if (mechanic === 'bubbles') return state.mechanicUnlocks[groupKey].bubbles;
+    if (mechanic === 'find') return state.mechanicUnlocks[groupKey].find;
     return false;
   });
 }

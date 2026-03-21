@@ -6,7 +6,7 @@ import { useGameStore, UnlockEvent } from '@/store/useGameStore';
 import { FLOORS, getFloorById } from '@/data/floors';
 import { ANIMALS } from '@/data/animals';
 import { COLORS } from '@/data/colors';
-import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD } from '@/data/thresholds';
+import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD, FIND_UNLOCK_THRESHOLD } from '@/data/thresholds';
 import { LockOverlay } from '@/components/ui/LockOverlay';
 import { UnlockBanner } from '@/components/ui/UnlockBanner';
 import { NumberGroupKey } from '@/types/game';
@@ -90,6 +90,9 @@ export default function FloorMenu() {
       } else if (event.mechanic === 'bubbles') {
         setBannerMessage('Pop the bubbles unlocked!');
         setBannerEmoji('🫧');
+      } else if (event.mechanic === 'find') {
+        setBannerMessage('Find the Number unlocked!');
+        setBannerEmoji('🔊');
       }
       setBannerVisible(true);
       clearUnlockEvents();
@@ -103,10 +106,13 @@ export default function FloorMenu() {
   const floorGroups: NumberGroupKey[] = floor ? floor.groups : ['1_10'];
   const feedUnlocked = floorGroups.some((g) => mechanicUnlocks[g]?.feed ?? false);
   const bubblesUnlocked = floorGroups.some((g) => mechanicUnlocks[g]?.bubbles ?? false);
+  const findUnlocked = floorGroups.some((g) => mechanicUnlocks[g]?.find ?? false);
 
   // Compute progress across ALL groups in this floor
   let countingCorrect = 0;
   let feedCorrect = 0;
+  let bubblesCorrect = 0;
+  let findCorrect = 0;
   if (floor) {
     const [from, to] = floor.numberRange;
     for (let n = from; n <= to; n++) {
@@ -114,6 +120,8 @@ export default function FloorMenu() {
       if (stats) {
         countingCorrect += stats.countingCorrect;
         feedCorrect += stats.feedCorrect;
+        bubblesCorrect += stats.bubblesCorrect;
+        findCorrect += stats.findCorrect ?? 0;
       }
     }
   }
@@ -208,6 +216,19 @@ export default function FloorMenu() {
           progressPercent={0}
           color="#A4D2E1"
           onPress={() => router.push({ pathname: '/game/bubbles', params: { floorId: floor.id } })}
+        />
+
+        <MechanicCard
+          title="Find the Number!"
+          description="Listen and tap the right number"
+          emoji="🔊"
+          isLocked={!findUnlocked}
+          lockMessage={`Complete ${Math.max(FIND_UNLOCK_THRESHOLD - bubblesCorrect, 0)} more bubble rounds to unlock`}
+          progressText={findUnlocked ? `${findCorrect} correct` : undefined}
+          progressPercent={findUnlocked ? Math.min((findCorrect / 5) * 100, 100) : 0}
+          color="#C9A4E1"
+          isNew={findUnlocked && findCorrect === 0}
+          onPress={() => router.push({ pathname: '/game/find-number', params: { floorId: floor.id } })}
         />
       </ScrollView>
     </SafeAreaView>
