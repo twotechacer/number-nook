@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useFindNumberGame } from '@/hooks/useFindNumberGame';
 import { FindNumberButton } from '@/components/game/FindNumberButton';
 import { Sparkles } from '@/components/ui/Sparkles';
@@ -23,16 +23,37 @@ export default function FindNumberGame() {
 
   const [wrongChoice, setWrongChoice] = useState<number | null>(null);
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
+  const screenFocused = useRef(true);
+  const pendingSpeak = useRef(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubFocus = navigation.addListener('focus', () => {
+      screenFocused.current = true;
+      if (pendingSpeak.current && targetNumber > 0) {
+        pendingSpeak.current = false;
+        speakFindPrompt(targetNumber);
+      }
+    });
+    const unsubBlur = navigation.addListener('blur', () => {
+      screenFocused.current = false;
+    });
+    return () => { unsubFocus(); unsubBlur(); };
+  }, [navigation, targetNumber]);
 
   // Start first round on mount
   useEffect(() => {
     if (phase === 'idle') startRound();
   }, [phase, startRound]);
 
-  // Auto-play voice on round start
+  // Auto-play voice on round start — only if screen is focused
   useEffect(() => {
     if (phase === 'listening' && targetNumber > 0) {
-      speakFindPrompt(targetNumber);
+      if (screenFocused.current) {
+        speakFindPrompt(targetNumber);
+      } else {
+        pendingSpeak.current = true;
+      }
     }
   }, [phase, targetNumber, round]);
 
