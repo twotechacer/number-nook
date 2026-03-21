@@ -79,6 +79,7 @@ export const useGameStore = create<GameStore>()(
             else if (mechanic === 'feed') updated.feedCorrect += 1;
             else if (mechanic === 'bubbles') updated.bubblesCorrect += 1;
             else if (mechanic === 'find') updated.findCorrect += 1;
+            else { const _exhaustive: never = mechanic; }
           } else {
             updated.wrong += 1;
           }
@@ -199,7 +200,7 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => {
         const {
           isHydrated, currentSessionStart, currentSessionNumbers,
-          currentSessionMechanics, currentSessionStars, pendingUnlockEvents,
+          currentSessionMechanics, currentSessionStars,
           setChildName, setVoicePreference, updateSettings, recordAnswer,
           addStar, overrideFloorUnlock, overrideMechanicUnlock,
           startSession, endSession, resetProgress, setHydrated, clearUnlockEvents,

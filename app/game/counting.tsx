@@ -90,6 +90,13 @@ export default function CountingGame() {
   }, [phase, startRound]);
 
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
+  const [wrongPhrase, setWrongPhrase] = useState('');
+
+  useEffect(() => {
+    if (phase === 'wrong') {
+      setWrongPhrase(getRandomWrongPhrase());
+    }
+  }, [phase]);
 
   // Sparkle on correct answer
   useEffect(() => {
@@ -183,7 +190,7 @@ export default function CountingGame() {
             ))}
           </View>
           {phase === 'wrong' && (
-            <Text style={styles.tryAgain}>Hmm, let's try again!</Text>
+            <Text style={styles.tryAgain}>{wrongPhrase}</Text>
           )}
         </View>
       )}

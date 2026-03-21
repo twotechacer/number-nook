@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -100,7 +100,17 @@ export default function FeedingGame() {
   // Track which treats are fed (by actual tapped index)
   const fedSet = useMemo(() => new Set(fedIndices), [fedIndices]);
 
+  const navigatedRef = useRef(false);
+
+  useEffect(() => {
+    if (phase === 'idle' || phase === 'complete') {
+      navigatedRef.current = false;
+    }
+  }, [phase]);
+
   const handleTummyFullComplete = () => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
     router.push({
       pathname: '/star-award',
       params: { number: String(targetNumber), floorId },
@@ -164,7 +174,7 @@ export default function FeedingGame() {
       )}
 
       {/* Answer phase */}
-      {(phase === 'answering' || phase === 'wrong') && (
+      {(phase === 'answering' || phase === 'wrong' || phase === 'correct') && (
         <View style={styles.answerSection}>
           <Text style={styles.questionText}>
             How many {animal?.treat}s did you feed {animal?.name.split(' ')[0]}?
@@ -176,7 +186,13 @@ export default function FeedingGame() {
                 value={choice}
                 onSelect={selectAnswer}
                 disabled={phase !== 'answering'}
-                isCorrect={null}
+                isCorrect={
+                  phase === 'correct' && choice === targetNumber
+                    ? true
+                    : phase === 'wrong' && choice !== targetNumber
+                    ? null
+                    : null
+                }
                 isHinted={showHint && choice === targetNumber}
               />
             ))}

@@ -1,5 +1,5 @@
 import { NumberStats, MechanicUnlockMap, FloorUnlocks, NumberGroupKey } from '@/types/game';
-import { NUMBER_GROUPS } from '@/data/floors';
+import { NUMBER_GROUPS, FLOORS } from '@/data/floors';
 import { FEED_UNLOCK_THRESHOLD, BUBBLES_UNLOCK_THRESHOLD, FIND_UNLOCK_THRESHOLD, FLOOR_MASTERY_PERCENT } from '@/data/thresholds';
 import { countMastered } from './mastery';
 
@@ -53,11 +53,13 @@ export function computeFloorUnlocks(
 ): FloorUnlocks {
   if (!autoUnlock) return currentUnlocks;
 
-  const floor1Total = 10;
-  const floor2Total = 20;
+  const floor1Range = FLOORS[0].numberRange;
+  const floor2Range = FLOORS[1].numberRange;
+  const floor1Total = floor1Range[1] - floor1Range[0] + 1;
+  const floor2Total = floor2Range[1] - floor2Range[0] + 1;
 
-  const floor1Mastered = countMastered(mastery, 1, 10);
-  const floor2Mastered = countMastered(mastery, 11, 30);
+  const floor1Mastered = countMastered(mastery, floor1Range[0], floor1Range[1]);
+  const floor2Mastered = countMastered(mastery, floor2Range[0], floor2Range[1]);
 
   return {
     floor2: currentUnlocks.floor2 || floor1Mastered >= Math.ceil(floor1Total * FLOOR_MASTERY_PERCENT),

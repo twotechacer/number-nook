@@ -119,4 +119,54 @@ describe('speakNumber', () => {
     const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
     expect(text).toBe('100');
   });
+
+  it('speaks string fallback for 0', () => {
+    speakNumber(0);
+    const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
+    expect(text).toBe('0');
+  });
+
+  it('speaks string fallback for 51', () => {
+    speakNumber(51);
+    const text = (Speech.speak as jest.Mock).mock.calls[0][0] as string;
+    expect(text).toBe('51');
+  });
+});
+
+describe('Speech.stop called before Speech.speak', () => {
+  it('calls stop before speak for speakNumber', () => {
+    const callOrder: string[] = [];
+    (Speech.stop as jest.Mock).mockImplementation(() => callOrder.push('stop'));
+    (Speech.speak as jest.Mock).mockImplementation(() => callOrder.push('speak'));
+    speakNumber(5);
+    expect(callOrder).toEqual(['stop', 'speak']);
+  });
+
+  it('calls stop before speak for speakWrongFeedback', () => {
+    const callOrder: string[] = [];
+    (Speech.stop as jest.Mock).mockImplementation(() => callOrder.push('stop'));
+    (Speech.speak as jest.Mock).mockImplementation(() => callOrder.push('speak'));
+    speakWrongFeedback(0);
+    expect(callOrder).toEqual(['stop', 'speak']);
+  });
+
+  it('calls stop before speak for speakCorrectFeedback', () => {
+    const callOrder: string[] = [];
+    (Speech.stop as jest.Mock).mockImplementation(() => callOrder.push('stop'));
+    (Speech.speak as jest.Mock).mockImplementation(() => callOrder.push('speak'));
+    speakCorrectFeedback(3);
+    expect(callOrder).toEqual(['stop', 'speak']);
+  });
+});
+
+describe('rapid sequential calls', () => {
+  it('does not crash when called rapidly in sequence', () => {
+    expect(() => {
+      speakWrongFeedback(0);
+      speakCorrectFeedback(5, 'Luna');
+      speakWrongFeedback(1);
+      speakFindPrompt(10);
+      speakFindRetry(3);
+    }).not.toThrow();
+  });
 });

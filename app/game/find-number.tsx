@@ -10,39 +10,7 @@ import { getFloorById } from '@/data/floors';
 import { COLORS } from '@/data/colors';
 import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 import { FloorId } from '@/types/game';
-
-const NUMBER_WORDS: Record<number, string> = {
-  1:'one',2:'two',3:'three',4:'four',5:'five',6:'six',7:'seven',8:'eight',9:'nine',10:'ten',
-  11:'eleven',12:'twelve',13:'thirteen',14:'fourteen',15:'fifteen',16:'sixteen',17:'seventeen',
-  18:'eighteen',19:'nineteen',20:'twenty',21:'twenty-one',22:'twenty-two',23:'twenty-three',
-  24:'twenty-four',25:'twenty-five',26:'twenty-six',27:'twenty-seven',28:'twenty-eight',
-  29:'twenty-nine',30:'thirty',31:'thirty-one',32:'thirty-two',33:'thirty-three',
-  34:'thirty-four',35:'thirty-five',36:'thirty-six',37:'thirty-seven',38:'thirty-eight',
-  39:'thirty-nine',40:'forty',41:'forty-one',42:'forty-two',43:'forty-three',44:'forty-four',
-  45:'forty-five',46:'forty-six',47:'forty-seven',48:'forty-eight',49:'forty-nine',50:'fifty',
-};
-
-function speakFind(number: number) {
-  try {
-    const Speech = require('expo-speech');
-    const word = NUMBER_WORDS[number] || String(number);
-    Speech.stop();
-    Speech.speak(`Find ${word}`, { rate: 0.75 });
-  } catch {
-    /* expo-speech not installed */
-  }
-}
-
-function speakRetry(number: number) {
-  try {
-    const Speech = require('expo-speech');
-    const word = NUMBER_WORDS[number] || String(number);
-    Speech.stop();
-    Speech.speak(`Try again, find ${word}`, { rate: 0.75 });
-  } catch {
-    /* expo-speech not installed */
-  }
-}
+import { speakFindPrompt, speakFindRetry } from '@/utils/voice';
 
 export default function FindNumberGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
@@ -64,14 +32,14 @@ export default function FindNumberGame() {
   // Auto-play voice on round start
   useEffect(() => {
     if (phase === 'listening' && targetNumber > 0) {
-      speakFind(targetNumber);
+      speakFindPrompt(targetNumber);
     }
   }, [phase, targetNumber, round]);
 
   // Handle wrong answer: speak retry and transition back to listening
   useEffect(() => {
     if (phase === 'wrong') {
-      speakRetry(targetNumber);
+      speakFindRetry(targetNumber);
       const timer = setTimeout(() => {
         setWrongChoice(null);
         retryAnswer();
@@ -146,8 +114,10 @@ export default function FindNumberGame() {
       <View style={styles.speakerContainer}>
         <Pressable
           testID="speaker-button"
+          accessibilityLabel="Tap to hear the number again"
+          accessibilityRole="button"
           style={({ pressed }) => [styles.speakerButton, pressed && styles.speakerPressed]}
-          onPress={() => speakFind(targetNumber)}
+          onPress={() => speakFindPrompt(targetNumber)}
         >
           <Text style={styles.speakerEmoji}>🔊</Text>
         </Pressable>
