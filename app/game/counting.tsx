@@ -10,6 +10,8 @@ import { getAnimalForNumber } from '@/data/animals';
 import { getRandomWrongPhrase } from '@/data/phrases';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
+import { useGameStore } from '@/store/useGameStore';
+import { speakWrongFeedback, speakCorrectFeedback } from '@/utils/voice';
 
 // Object emojis per floor theme
 const OBJECT_EMOJIS: Record<string, string[]> = {
@@ -21,11 +23,14 @@ const OBJECT_EMOJIS: Record<string, string[]> = {
 export default function CountingGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
   const floorId = (params.floorId || 'floor1') as FloorId;
+  const childName = useGameStore((s) => s.childName);
 
   const {
     phase, targetNumber, tappedCount, tappedIndices, answerChoices, attempts,
     startRound, tapObject, selectAnswer, retryAnswer, completeRound,
   } = useCountingGame(floorId);
+
+  const [showHint, setShowHint] = useState(false);
 
   // Start first round on mount
   useEffect(() => {
@@ -35,14 +40,21 @@ export default function CountingGame() {
   // Auto-retry after wrong answer shake
   useEffect(() => {
     if (phase === 'wrong') {
+      const voiceTimer = setTimeout(() => speakWrongFeedback(attempts), 200);
+      if (attempts >= 1) setShowHint(true);
       const timer = setTimeout(retryAnswer, 800);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(voiceTimer);
+        clearTimeout(timer);
+      };
     }
-  }, [phase, retryAnswer]);
+  }, [phase, retryAnswer, attempts]);
 
   // Navigate to star award on correct
   useEffect(() => {
     if (phase === 'correct') {
+      const voiceTimer = setTimeout(() => speakCorrectFeedback(targetNumber, childName || undefined), 200);
+      setShowHint(false);
       const timer = setTimeout(() => {
         router.push({
           pathname: '/star-award',
@@ -50,9 +62,12 @@ export default function CountingGame() {
         });
         completeRound();
       }, 800);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(voiceTimer);
+        clearTimeout(timer);
+      };
     }
-  }, [phase, targetNumber, floorId, completeRound]);
+  }, [phase, targetNumber, floorId, completeRound, childName]);
 
   // Reset when coming back from star award
   useEffect(() => {
@@ -130,6 +145,7 @@ export default function CountingGame() {
                     ? null
                     : null
                 }
+                isHinted={showHint && choice === targetNumber}
               />
             ))}
           </View>

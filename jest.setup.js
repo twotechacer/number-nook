@@ -40,6 +40,13 @@ jest.mock('expo-router', () => ({
   Link: jest.fn().mockReturnValue(null),
 }));
 
+// Mock expo-speech
+jest.mock('expo-speech', () => ({
+  speak: jest.fn(),
+  stop: jest.fn(),
+  isSpeakingAsync: jest.fn().mockResolvedValue(false),
+}));
+
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');

@@ -9,15 +9,20 @@ import { Sparkles } from '@/components/ui/Sparkles';
 import { getAnimalForNumber } from '@/data/animals';
 import { COLORS } from '@/data/colors';
 import { FloorId } from '@/types/game';
+import { useGameStore } from '@/store/useGameStore';
+import { speakWrongFeedback, speakCorrectFeedback } from '@/utils/voice';
 
 export default function BubblesGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
   const floorId = (params.floorId || 'floor1') as FloorId;
+  const childName = useGameStore((s) => s.childName);
 
   const {
     phase, targetNumber, poppedCount, answerChoices, attempts,
     startRound, popBubble, selectAnswer, retryAnswer, completeRound,
   } = useBubblesGame(floorId);
+
+  const [showHint, setShowHint] = useState(false);
 
   // Start first round on mount
   useEffect(() => {
@@ -27,14 +32,21 @@ export default function BubblesGame() {
   // Auto-retry after wrong answer
   useEffect(() => {
     if (phase === 'wrong') {
+      const voiceTimer = setTimeout(() => speakWrongFeedback(attempts), 200);
+      if (attempts >= 1) setShowHint(true);
       const timer = setTimeout(retryAnswer, 800);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(voiceTimer);
+        clearTimeout(timer);
+      };
     }
-  }, [phase, retryAnswer]);
+  }, [phase, retryAnswer, attempts]);
 
   // Navigate to star award on correct
   useEffect(() => {
     if (phase === 'correct') {
+      const voiceTimer = setTimeout(() => speakCorrectFeedback(targetNumber, childName || undefined), 200);
+      setShowHint(false);
       const timer = setTimeout(() => {
         router.push({
           pathname: '/star-award',
@@ -42,9 +54,12 @@ export default function BubblesGame() {
         });
         completeRound();
       }, 800);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(voiceTimer);
+        clearTimeout(timer);
+      };
     }
-  }, [phase, targetNumber, floorId, completeRound]);
+  }, [phase, targetNumber, floorId, completeRound, childName]);
 
   // Reset when coming back from star award
   useEffect(() => {
@@ -125,6 +140,7 @@ export default function BubblesGame() {
                     ? null
                     : null
                 }
+                isHinted={showHint && choice === targetNumber}
               />
             ))}
           </View>
