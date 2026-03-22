@@ -212,8 +212,8 @@ export default function FloorMenu() {
           emoji="🫧"
           isLocked={!bubblesUnlocked}
           lockMessage={`Complete ${Math.max(BUBBLES_UNLOCK_THRESHOLD - feedCorrect, 0)} more feeding rounds to unlock`}
-          progressText={bubblesUnlocked ? 'Ready to play!' : undefined}
-          progressPercent={0}
+          progressText={bubblesUnlocked ? `${bubblesCorrect} correct` : undefined}
+          progressPercent={bubblesUnlocked ? Math.min((bubblesCorrect / 5) * 100, 100) : 0}
           color="#A4D2E1"
           onPress={() => router.push({ pathname: '/game/bubbles', params: { floorId: floor.id } })}
         />

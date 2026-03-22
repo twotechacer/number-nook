@@ -10,7 +10,8 @@ import { getFloorById } from '@/data/floors';
 import { COLORS } from '@/data/colors';
 import { MAX_ANSWER_ATTEMPTS } from '@/data/thresholds';
 import { FloorId } from '@/types/game';
-import { speakFindPrompt, speakFindRetry, stopSpeech } from '@/utils/voice';
+import { speakFindPrompt, speakFindRetry, speakCorrectFeedback } from '@/utils/voice';
+import { useGameStore } from '@/store/useGameStore';
 
 export default function FindNumberGame() {
   const params = useLocalSearchParams<{ floorId: string }>();
@@ -21,6 +22,7 @@ export default function FindNumberGame() {
     startRound, selectNumber, retryAnswer, restartSameRound, nextRound,
   } = useFindNumberGame(floorId);
 
+  const childName = useGameStore((s) => s.childName);
   const [wrongChoice, setWrongChoice] = useState<number | null>(null);
   const [sparkleTrigger, setSparkleTrigger] = useState(0);
   const screenFocused = useRef(true);
@@ -69,10 +71,14 @@ export default function FindNumberGame() {
     }
   }, [phase, targetNumber, retryAnswer]);
 
-  // Handle correct answer: stop speech, navigate to star award
   useEffect(() => {
     if (phase === 'correct') {
-      stopSpeech();
+      setTimeout(() => speakCorrectFeedback(targetNumber, childName || undefined), 200);
+    }
+  }, [phase, targetNumber, childName]);
+
+  useEffect(() => {
+    if (phase === 'correct') {
       setSparkleTrigger((prev) => prev + 1);
       const timer = setTimeout(() => {
         router.push({
